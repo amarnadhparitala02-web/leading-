@@ -28,25 +28,30 @@ export async function POST(request) {
     const mech = "btech-mechanical-engineering";
     const agri = "agri-b-sc-hons-agriculture";
     const colleges = await insertMany("colleges", [
-      { ...base, name: "DEMO College A", district: "Hyderabad", description: "Demo record. Not a real college.", courseIds: [cse, ece, mech] },
-      { ...base, name: "DEMO College B", district: "Warangal", description: "Demo record. Not a real college.", courseIds: [cse, mech] },
-      { ...base, name: "DEMO Agriculture College C", district: "Rangareddy", description: "Demo record. Not a real college.", courseIds: [agri] },
+      { ...base, name: "DEMO College A", state: "Telangana", district: "Hyderabad", description: "Demo record. Not a real college.", courseIds: [cse, ece, mech] },
+      { ...base, name: "DEMO College B", state: "Telangana", district: "Warangal", description: "Demo record. Not a real college.", courseIds: [cse, mech] },
+      { ...base, name: "DEMO Agriculture College C", state: "Telangana", district: "Rangareddy", description: "Demo record. Not a real college.", courseIds: [agri] },
+      { ...base, name: "DEMO College D", state: "Andhra Pradesh", district: "Visakhapatnam", description: "Demo record. Not a real college.", courseIds: [cse, ece] },
+      { ...base, name: "DEMO Agriculture College E", state: "Andhra Pradesh", district: "Guntur", description: "Demo record. Not a real college.", courseIds: [agri] },
     ]);
-    const [a, b, c] = colleges.map((x) => x.id);
+    const [a, b, c, d, e] = colleges.map((x) => x.id);
     const rows = [];
-    const add = (collegeId, courseId, closing) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const add = (collegeId, courseId, closing, exam) => {
       for (const category of ["OC", "BC-B", "SC"]) {
         const f = category === "OC" ? 1 : category === "BC-B" ? 1.8 : 3.5;
         rows.push({
-          collegeId, courseId, year: 2025, round: "Final", category, gender: "Any",
+          collegeId, courseId, exam, year: 2025, round: "Final", category, gender: "Any",
           closingRank: Math.round(closing * f), source: "DEMO - not real data",
-          verified: true, verifiedOn: new Date().toISOString().slice(0, 10), demo: true,
+          verified: true, verifiedOn: today, demo: true,
         });
       }
     };
-    add(a, cse, 5000); add(a, ece, 9000); add(a, mech, 24000);
-    add(b, cse, 12000); add(b, mech, 38000);
-    add(c, agri, 6000);
+    add(a, cse, 5000, "TS EAPCET"); add(a, ece, 9000, "TS EAPCET"); add(a, mech, 24000, "TS EAPCET");
+    add(b, cse, 12000, "TS EAPCET"); add(b, mech, 38000, "TS EAPCET");
+    add(c, agri, 6000, "TS EAPCET");
+    add(d, cse, 7000, "AP EAPCET"); add(d, ece, 15000, "AP EAPCET");
+    add(e, agri, 8000, "AP EAPCET");
     await insertMany("cutoffs", rows);
     return json({ ok: true });
   }

@@ -1,5 +1,6 @@
 import { all } from "@/lib/db";
 import { photoUrl } from "@/lib/photos";
+import { DEFAULT_EXAM } from "@/lib/site";
 import { publicCollege } from "@/lib/public";
 
 export async function GET(request, { params }) {
@@ -17,6 +18,7 @@ export async function GET(request, { params }) {
       round: c.round,
       category: c.category,
       gender: c.gender,
+      exam: c.exam || DEFAULT_EXAM,
       closingRank: c.closingRank,
       source: c.source,
       demo: Boolean(c.demo),

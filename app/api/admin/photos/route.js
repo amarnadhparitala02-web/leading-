@@ -9,7 +9,7 @@ export async function GET(request) {
   const [photos, colleges] = await Promise.all([all("photos"), all("colleges")]);
   const name = new Map(colleges.map((c) => [c.id, c.name]));
   const list = photos
-    .map((p) => ({ ...p, url: photoUrl(p.file), collegeName: p.collegeId ? name.get(p.collegeId) || "?" : "General" }))
+    .map((p) => ({ ...p, url: photoUrl(p.file), collegeName: p.collegeId ? name.get(p.collegeId) || "?" : p.slot === "hero" ? "Homepage hero" : "General" }))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return json({ photos: list });
 }
@@ -33,8 +33,17 @@ export async function POST(request) {
     return json({ error: "College not found" }, 400);
   }
 
+  // A general photo can be the homepage hero image. Only one at a time: the newest replaces the old.
+  const slot = !collegeId && form.get("slot") === "hero" ? "hero" : "";
+  if (slot) {
+    for (const old of (await all("photos")).filter((p) => p.slot === "hero")) {
+      await deletePhotoFile(old.file);
+      await remove("photos", old.id);
+    }
+  }
+
   const stored = await savePhotoFile(buf, ext);
-  const photo = await insert("photos", { file: stored, collegeId: collegeId || "", caption: clean(form.get("caption"), 150) });
+  const photo = await insert("photos", { file: stored, collegeId: collegeId || "", caption: clean(form.get("caption"), 150), slot });
   return json({ photo: { ...photo, url: photoUrl(stored) } });
 }
 

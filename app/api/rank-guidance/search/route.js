@@ -1,7 +1,7 @@
 import { currentStudent } from "@/lib/auth";
 import { insert } from "@/lib/db";
 import { matchRank } from "@/lib/match";
-import { CATEGORIES, GENDERS, STREAMS } from "@/lib/site";
+import { CATEGORIES, EXAMS, GENDERS, STREAMS } from "@/lib/site";
 import { clean, json, normalizePhone, rateLimited, validPhone } from "@/lib/validate";
 
 export async function POST(request) {
@@ -13,6 +13,7 @@ export async function POST(request) {
   const student = await currentStudent(request);
   const name = student ? student.name : clean(body.name, 100);
   const phone = student ? student.phone : normalizePhone(body.phone);
+  const exam = clean(body.exam, 20);
   const stream = clean(body.stream, 20);
   const category = clean(body.category, 10);
   const gender = clean(body.gender, 10);
@@ -22,6 +23,7 @@ export async function POST(request) {
 
   if (name.length < 2) return json({ error: "Please enter your full name" }, 400);
   if (!validPhone(phone)) return json({ error: "Enter a valid 10-digit mobile number" }, 400);
+  if (!EXAMS.includes(exam)) return json({ error: "Choose AP EAPCET or TS EAPCET" }, 400);
   if (!STREAMS[stream]) return json({ error: "Choose a stream" }, 400);
   if (!CATEGORIES.includes(category)) return json({ error: "Choose a category" }, 400);
   if (!GENDERS.includes(gender)) return json({ error: "Choose Boys or Girls" }, 400);
@@ -29,12 +31,12 @@ export async function POST(request) {
   if (!Number.isInteger(rank) || rank < 1 || rank > 1_000_000) return json({ error: "Enter a valid rank" }, 400);
   if (body.privacyConsent !== true) return json({ error: "Please accept the privacy notice to continue" }, 400);
 
-  const results = await matchRank({ stream, rank, category, gender, region });
+  const results = await matchRank({ exam, stream, rank, category, gender, region });
   const followUp = body.followUpConsent === true;
   const now = new Date().toISOString();
 
   const search = await insert("rankSearches", {
-    name, phone, year, stream, rank, category, gender, region,
+    name, phone, exam, year, stream, rank, category, gender, region,
     consent: { privacyAt: now, followUp },
     resultCount: results.length,
     studentId: student?.id || "",
@@ -43,7 +45,7 @@ export async function POST(request) {
   // A student who agrees to follow-up becomes a counselling lead straight away.
   if (followUp) {
     await insert("leads", {
-      name, phone, email: "", stream, year, rank, category, source: "rank-guidance",
+      name, phone, email: "", stream, exam, year, rank, category, source: "rank-guidance",
       message: "", consent: { privacyAt: now, followUp: true },
       status: "new", assignedTo: "", nextActionDate: "", activities: [], searchId: search.id,
       studentId: student?.id || "",

@@ -19,7 +19,7 @@ export async function GET(request) {
     searches: searches
       .filter((s) => s.studentId === id)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map((s) => ({ id: s.id, createdAt: s.createdAt, year: s.year, stream: s.stream, rank: s.rank, category: s.category, gender: s.gender, region: s.region, resultCount: s.resultCount })),
+      .map((s) => ({ id: s.id, createdAt: s.createdAt, exam: s.exam || "", year: s.year, stream: s.stream, rank: s.rank, category: s.category, gender: s.gender, region: s.region, resultCount: s.resultCount })),
     saved: saved
       .filter((s) => s.studentId === id && collegeById.has(s.collegeId))
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))

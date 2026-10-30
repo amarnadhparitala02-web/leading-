@@ -1,11 +1,13 @@
 import { guard } from "@/lib/auth";
 import { all, insert, patch, save } from "@/lib/db";
 import { deletePhotoFile } from "@/lib/photos";
+import { STATES } from "@/lib/site";
 import { clean, json } from "@/lib/validate";
 
 function fromBody(b) {
   return {
     name: clean(b.name, 150),
+    state: STATES.includes(b.state) ? b.state : "",
     district: clean(b.district, 60),
     address: clean(b.address, 300),
     website: /^https?:\/\//i.test(String(b.website || "")) ? clean(b.website, 200) : "",

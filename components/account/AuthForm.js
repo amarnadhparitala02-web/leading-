@@ -33,7 +33,7 @@ export default function AuthForm({ onDone }) {
         Keep your rank searches, saved colleges and counselling requests in one place.
       </p>
 
-      <form onSubmit={submit} className="glass-card mt-6 grid gap-3 p-6">
+      <form onSubmit={submit} className="card mt-6 grid gap-3 p-6">
         {mode === "register" && <input name="name" required placeholder="Full name" autoComplete="name" className="input" />}
         <input name="phone" required inputMode="tel" placeholder="Mobile number" autoComplete="tel" className="input" />
         <input name="password" type="password" required minLength={mode === "register" ? 8 : undefined}

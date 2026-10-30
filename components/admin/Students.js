@@ -32,10 +32,10 @@ export default function Students() {
     <div className="space-y-4">
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or mobile number" className="input max-w-sm" />
       {msg && <p className="text-sm text-slate-700">{msg}</p>}
-      {shown.length === 0 && <p className="glass-card p-6 text-slate-500">{students.length ? "No match." : "No student accounts yet."}</p>}
+      {shown.length === 0 && <p className="card p-6 text-slate-500">{students.length ? "No match." : "No student accounts yet."}</p>}
       <div className="space-y-2">
         {shown.map((s) => (
-          <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 glass-card p-3">
+          <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 card p-3">
             <div>
               <p className="font-semibold">{s.name} · <a href={`tel:${s.phone}`} className="text-brand underline">{s.phone}</a></p>
               <p className="text-xs text-slate-500">

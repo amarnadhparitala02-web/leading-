@@ -1,11 +1,12 @@
 import { guard } from "@/lib/auth";
 import { all, insertMany } from "@/lib/db";
 import { parseCsv } from "@/lib/csv";
+import { STATES } from "@/lib/site";
 import { clean, json } from "@/lib/validate";
 
 const REQUIRED = ["name", "district"];
 
-// CSV columns: name, district, address, website, description, courses, partner
+// CSV columns: name, district, address, website, description, courses, partner, state (optional: Telangana or Andhra Pradesh)
 //   courses: course names separated by ; (must already exist under Courses)
 //   partner: yes/no. "yes" records the MOU but does NOT make it public; an admin
 //            must tick public display on the college so only confirmed partners show.
@@ -49,6 +50,7 @@ export async function POST(request) {
 
     good.push({
       name, district,
+      state: STATES.find((x) => x.toLowerCase() === (r.state || "").toLowerCase()) || "",
       address: clean(r.address, 300),
       website: /^https?:\/\//i.test(r.website || "") ? clean(r.website, 200) : "",
       description: clean(r.description, 2000),

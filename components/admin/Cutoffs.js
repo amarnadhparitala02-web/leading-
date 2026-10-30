@@ -43,10 +43,10 @@ export default function Cutoffs() {
 
   return (
     <div className="space-y-6">
-      <div className="glass-card p-4">
+      <div className="card p-4">
         <h3 className="font-bold">Import cutoffs (CSV)</h3>
         <p className="mt-1 text-xs text-slate-500">
-          Columns: <code>college, course, year, round, category, gender, closingRank, source</code>. College and course names
+          Columns: <code>college, course, year, round, category, gender, closingRank, source</code> and optionally <code>exam</code> (TS EAPCET or AP EAPCET; blank means TS EAPCET). College and course names
           must already exist. Gender is Boys, Girls or Any. Imported rows stay unverified until you verify them.
         </p>
         <textarea value={csv} onChange={(e) => setCsv(e.target.value)} rows={5} placeholder={SAMPLE} className="input mt-2 font-mono text-xs" />
@@ -73,13 +73,13 @@ export default function Cutoffs() {
           <option value="verified">Verified</option>
           <option value="unverified">Unverified</option>
         </select>
-        {shown.length === 0 && <p className="glass-card p-6 text-slate-500">No cutoff records.</p>}
+        {shown.length === 0 && <p className="card p-6 text-slate-500">No cutoff records.</p>}
         <div className="space-y-2">
           {shown.map((c) => (
-            <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 glass-card p-3 text-sm">
+            <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 card p-3 text-sm">
               <div>
                 <p className="font-semibold">{c.collegeName} · {c.courseName} {c.demo && <b className="text-xs text-red-600">DEMO</b>}</p>
-                <p className="text-xs text-slate-500">{c.year} · {c.round} · {c.category} · {c.gender} · closing {c.closingRank.toLocaleString("en-IN")} · {c.source}</p>
+                <p className="text-xs text-slate-500">{c.exam || "TS EAPCET"} · {c.year} · {c.round} · {c.category} · {c.gender} · closing {c.closingRank.toLocaleString("en-IN")} · {c.source}</p>
               </div>
               <div className="flex gap-3">
                 <button onClick={() => verify(c)} className={`text-sm underline ${c.verified ? "text-green-700" : "text-amber-700"}`}>

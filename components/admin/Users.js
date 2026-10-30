@@ -47,7 +47,7 @@ export default function Users({ me }) {
   if (!users) return <p>Loading...</p>;
   return (
     <div className="space-y-6">
-      <form onSubmit={add} className="grid max-w-3xl gap-2 glass-card p-4 md:grid-cols-2">
+      <form onSubmit={add} className="grid max-w-3xl gap-2 card p-4 md:grid-cols-2">
         <h3 className="font-bold md:col-span-2">Add a person</h3>
         <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder="Full name" className="input" />
         <input value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required placeholder="Username (for login)" className="input" autoComplete="off" />
@@ -63,7 +63,7 @@ export default function Users({ me }) {
 
       <div className="space-y-2">
         {users.map((u) => (
-          <div key={u.id} className="flex flex-wrap items-center justify-between gap-3 glass-card p-3">
+          <div key={u.id} className="flex flex-wrap items-center justify-between gap-3 card p-3">
             <div>
               <p className={`font-semibold ${u.active ? "" : "text-slate-400 line-through"}`}>
                 {u.name} {u.id === me.id && <span className="text-xs font-normal text-slate-500">(you)</span>}

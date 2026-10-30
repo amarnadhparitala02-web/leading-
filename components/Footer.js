@@ -1,44 +1,70 @@
 import Link from "next/link";
 import { site, telHref, waHref } from "@/lib/site";
 
+const quick = [
+  ["/", "Home"], ["/about", "About"], ["/courses", "Courses"], ["/colleges", "Colleges"],
+  ["/rank-guidance", "Rank Checker"], ["/services", "Services"], ["/stories", "Student Stories"], ["/contact", "Contact"],
+];
+
+// Official council websites are listed so families can check notifications themselves.
+const official = [
+  ["https://tgche.ac.in", "Telangana State Council of Higher Education"],
+  ["https://apsche.ap.gov.in", "Andhra Pradesh State Council of Higher Education"],
+];
+
 export default function Footer() {
   return (
-    <footer className="relative mt-20 overflow-hidden bg-gradient-to-br from-[#0d4f9a] to-[#082f66] text-white">
-      <div className="blob -left-20 top-0 h-56 w-56 bg-[#4a93e0]" aria-hidden="true" />
-      <div className="blob -right-16 bottom-0 h-56 w-56 bg-[#e0281d]" aria-hidden="true" />
-      <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-12 text-sm md:grid-cols-3">
+    <footer className="on-dark mt-0 bg-[#0c2c24] text-white">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 text-sm md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="inline-block rounded-xl bg-white/90 px-3 py-2 shadow-lg">
+          <div className="inline-block rounded-xl bg-white px-3 py-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.jpg" alt={site.name} className="h-10 w-auto" />
           </div>
-          <p className="mt-3 text-slate-100/90">
-            Admission guidance for B.Tech and Agriculture students, from {site.city}.
+          <p className="mt-4 max-w-xs text-white/75">
+            Helping students across Andhra Pradesh and Telangana understand their options after +2, and take the next step with confidence.
           </p>
         </div>
-        <div className="space-y-1">
-          <p className="font-semibold">Explore</p>
-          <Link href="/rank-guidance" className="block text-slate-100/85 hover:underline">Rank Guidance</Link>
-          <Link href="/colleges" className="block text-slate-100/85 hover:underline">Colleges</Link>
-          <Link href="/courses" className="block text-slate-100/85 hover:underline">Courses</Link>
-          <Link href="/account" className="block text-slate-100/85 hover:underline">My account</Link>
-          <Link href="/privacy" className="block text-slate-100/85 hover:underline">Privacy notice</Link>
-        </div>
-        <div className="space-y-1">
-          <p className="font-semibold">Contact</p>
-          <p className="text-slate-100/85">
-            Phone:{" "}
-            {site.phone ? <a href={telHref()} className="underline">{site.phone}</a> : "to be added"}
-          </p>
-          {waHref() && (
-            <p><a href={waHref()} target="_blank" rel="noopener noreferrer" className="underline">Chat on WhatsApp</a></p>
-          )}
-          <p className="text-slate-100/85">Email: {site.email || "to be added"}</p>
-          <p className="text-slate-100/85">Address: {site.address || `${site.city} (full address to be added)`}</p>
+
+        <nav aria-label="Quick links">
+          <p className="font-semibold text-accent">Quick links</p>
+          <ul className="mt-3 space-y-2">
+            {quick.map(([href, label]) => (
+              <li key={href}><Link href={href} className="text-white/80 hover:text-white hover:underline">{label}</Link></li>
+            ))}
+          </ul>
+        </nav>
+
+        <nav aria-label="Important links">
+          <p className="font-semibold text-accent">Important links</p>
+          <ul className="mt-3 space-y-2">
+            {official.map(([href, label]) => (
+              <li key={href}><a href={href} target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white hover:underline">{label}</a></li>
+            ))}
+            <li><Link href="/account" className="text-white/80 hover:text-white hover:underline">My account</Link></li>
+          </ul>
+        </nav>
+
+        <div>
+          <p className="font-semibold text-accent">Contact</p>
+          <ul className="mt-3 space-y-2 text-white/80">
+            <li>Phone: {site.phone ? <a href={telHref()} className="underline">{site.phone}</a> : "to be added"}</li>
+            {waHref() && <li><a href={waHref()} target="_blank" rel="noopener noreferrer" className="underline">Chat on WhatsApp</a></li>}
+            <li>Email: {site.email || "to be added"}</li>
+            <li>Address: {site.address || `${site.city} (full address to be added)`}</li>
+            {site.hours && <li>Hours: {site.hours}</li>}
+          </ul>
         </div>
       </div>
-      <div className="relative border-t border-white/15 py-4 text-center text-xs text-slate-200">
-        © 2026 {site.name}. All rights reserved.
+
+      <div className="border-t border-white/15">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-xs text-white/70">
+          <p>© 2026 {site.name}. All rights reserved.</p>
+          <p className="flex gap-4">
+            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline">Terms &amp; Conditions</Link>
+          </p>
+        </div>
       </div>
     </footer>
   );

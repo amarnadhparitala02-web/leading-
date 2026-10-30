@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { api } from "./api";
+import { STATES } from "@/lib/site";
 
 const blank = {
-  name: "", district: "", address: "", website: "", description: "", facilities: "",
+  name: "", state: "", district: "", address: "", website: "", description: "", facilities: "",
   feeNote: "", feeVerifiedOn: "", active: true, mou: false, displayPublic: false, courseIds: [],
 };
 
@@ -80,7 +81,13 @@ export default function Colleges() {
       <form onSubmit={submit} className="grid max-w-2xl gap-3">
         <h2 className="text-lg font-bold">{editId ? "Edit college" : "Add college"}</h2>
         <input value={form.name} onChange={set("name")} required placeholder="College name" className="input" />
-        <input value={form.district} onChange={set("district")} required placeholder="District" className="input" />
+        <div className="grid grid-cols-2 gap-3">
+          <select value={form.state} onChange={set("state")} className="input" aria-label="State">
+            <option value="">State (choose)</option>
+            {STATES.map((s) => <option key={s}>{s}</option>)}
+          </select>
+          <input value={form.district} onChange={set("district")} required placeholder="District" className="input" />
+        </div>
         <input value={form.address} onChange={set("address")} placeholder="Address" className="input" />
         <input value={form.website} onChange={set("website")} placeholder="Official website (https://...)" className="input" />
         <textarea value={form.description} onChange={set("description")} rows={3} placeholder="Description" className="input" />
@@ -121,10 +128,10 @@ export default function Colleges() {
       </div>
 
       {showImport && (
-        <div className="mb-6 glass-card p-4">
+        <div className="mb-6 card p-4">
           <h3 className="font-bold">Import many colleges at once</h3>
           <p className="mt-1 text-xs text-slate-500">
-            Columns: <code>name, district, address, website, description, courses, partner</code>. Put several courses in one
+            Columns: <code>name, district, address, website, description, courses, partner, state</code> (state is optional: Telangana or Andhra Pradesh). Put several courses in one
             cell separated by <code>;</code> (they must already exist under Courses). Use <code>partner</code> = yes for colleges
             you have an MOU with. Partners are not shown publicly until you tick public display on each college.
             Colleges already listed by the same name are skipped.
@@ -142,14 +149,14 @@ export default function Colleges() {
           )}
         </div>
       )}
-      {colleges.length === 0 && <p className="glass-card p-6 text-slate-500">No colleges yet. Add one, or load demo data from the Cutoffs tab.</p>}
+      {colleges.length === 0 && <p className="card p-6 text-slate-500">No colleges yet. Add one, or load demo data from the Cutoffs tab.</p>}
       <div className="space-y-2">
         {colleges.map((c) => (
-          <div key={c.id} className="flex items-center justify-between glass-card p-3">
+          <div key={c.id} className="flex items-center justify-between card p-3">
             <div>
               <p className="font-semibold">{c.name} {c.demo && <b className="text-xs text-red-600">DEMO</b>}</p>
               <p className="text-xs text-slate-500">
-                {c.district} · {c.courseIds?.length || 0} courses · {c.active ? "Active" : "Hidden"}
+                {[c.district, c.state].filter(Boolean).join(", ")} · {c.courseIds?.length || 0} courses · {c.active ? "Active" : "Hidden"}
                 {c.partnership?.mou && ` · Partner${c.partnership.displayPublic ? " (public)" : " (private)"}`}
               </p>
             </div>

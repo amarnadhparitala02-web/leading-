@@ -49,7 +49,7 @@ export default function Courses() {
 
       <div className="space-y-2">
         {courses.map((c) => (
-          <div key={c.id} className="flex items-center justify-between glass-card p-3">
+          <div key={c.id} className="flex items-center justify-between card p-3">
             <p className={c.active ? "" : "text-slate-400 line-through"}>{c.name} <span className="text-xs text-slate-500">· {STREAMS[c.stream]}</span></p>
             <div className="flex gap-3 text-sm">
               <button onClick={() => toggle(c)} className="underline">{c.active ? "Hide" : "Show"}</button>

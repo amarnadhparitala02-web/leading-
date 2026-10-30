@@ -23,7 +23,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
         {tiles.map(([label, n]) => (
-          <div key={label} className="glass-card p-4">
+          <div key={label} className="card p-4">
             <p className="text-2xl font-bold">{n}</p>
             <p className="text-xs text-slate-500">{label}</p>
           </div>

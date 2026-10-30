@@ -10,6 +10,7 @@ import Cutoffs from "@/components/admin/Cutoffs";
 import Users from "@/components/admin/Users";
 import Photos from "@/components/admin/Photos";
 import Students from "@/components/admin/Students";
+import Stories from "@/components/admin/Stories";
 
 // adminOnly tabs are hidden from staff accounts (the APIs enforce this too).
 const tabs = [
@@ -19,6 +20,7 @@ const tabs = [
   { key: "courses", label: "Courses", View: Courses, adminOnly: true },
   { key: "cutoffs", label: "Cutoffs", View: Cutoffs, adminOnly: true },
   { key: "photos", label: "Photos", View: Photos, adminOnly: true },
+  { key: "stories", label: "Stories", View: Stories, adminOnly: true },
   { key: "students", label: "Students", View: Students, adminOnly: true },
   { key: "users", label: "Staff", View: Users, adminOnly: true },
 ];
@@ -77,7 +79,7 @@ export default function Admin() {
       <div className="mt-4 mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
         {visible.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${tab === t.key ? "border-b-2 border-accent text-accent" : "text-slate-600"}`}>
+            className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${tab === t.key ? "border-b-2 border-moss text-moss" : "text-slate-600"}`}>
             {t.label}
           </button>
         ))}

@@ -40,10 +40,10 @@ export default function Leads({ me }) {
         {me.role === "admin" && <a href="/api/admin/leads/export" className="btn btn-brand text-sm">Export CSV</a>}
       </div>
 
-      {shown.length === 0 && <p className="glass-card p-6 text-center text-slate-500">No leads yet.</p>}
+      {shown.length === 0 && <p className="card p-6 text-center text-slate-500">No leads yet.</p>}
       <div className="space-y-3">
         {shown.map((l) => (
-          <div key={l.id} className="glass-card p-4">
+          <div key={l.id} className="card p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-semibold">{l.name} · <a href={`tel:${l.phone}`} className="text-brand underline">{l.phone}</a></p>
@@ -73,7 +73,7 @@ export default function Leads({ me }) {
             </div>
 
             {open === l.id && (
-              <div className="mt-3 space-y-2 glass-card p-3 text-sm">
+              <div className="mt-3 space-y-2 card p-3 text-sm">
                 {(l.activities || []).map((a, i) => (
                   <p key={i}><span className="text-xs text-slate-500">{new Date(a.at).toLocaleString("en-IN")}{a.by && ` · ${a.by}`}</span><br />{a.note}</p>
                 ))}

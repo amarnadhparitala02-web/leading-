@@ -44,7 +44,7 @@ export default function Panel({ onSignedOut }) {
       <div className="mt-5 mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
         {TABS.map(([k, label]) => (
           <button key={k} onClick={() => setTab(k)}
-            className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${tab === k ? "border-b-2 border-accent text-accent" : "text-slate-600"}`}>
+            className={`whitespace-nowrap px-4 py-2 text-sm font-medium ${tab === k ? "border-b-2 border-moss text-moss" : "text-slate-600"}`}>
             {label}
           </button>
         ))}
@@ -70,14 +70,14 @@ function Overview({ data, go }) {
     <div className="space-y-6">
       <div className="grid gap-3 md:grid-cols-3">
         {tiles.map(([label, n, to]) => (
-          <button key={label} onClick={() => go(to)} className="glass-card p-5 text-left hover:shadow">
+          <button key={label} onClick={() => go(to)} className="card p-5 text-left hover:shadow">
             <p className="text-3xl font-bold">{n}</p>
             <p className="text-sm text-slate-500">{label}</p>
           </button>
         ))}
       </div>
       {latest && (
-        <p className="glass-card p-4 text-sm">
+        <p className="card p-4 text-sm">
           Your latest counselling request ({fmt(latest.createdAt)}) is <b>{statusLabel[latest.status] || latest.status}</b>
           {latest.assignedTo && <> with <b>{latest.assignedTo}</b></>}.
         </p>
@@ -107,10 +107,10 @@ function Searches({ data }) {
     <div className="space-y-3">
       <p className="text-xs text-slate-500">Results are re-checked against our latest verified data each time you open them. They are not a guarantee of admission.</p>
       {data.searches.map((s) => (
-        <div key={s.id} className="glass-card p-4">
+        <div key={s.id} className="card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="font-semibold">Rank {s.rank.toLocaleString("en-IN")} · {STREAMS[s.stream]} · {s.category} · {s.gender}</p>
+              <p className="font-semibold">Rank {s.rank.toLocaleString("en-IN")} · {s.exam ? `${s.exam} · ` : ""}{STREAMS[s.stream]} · {s.category} · {s.gender}</p>
               <p className="text-xs text-slate-500">{fmt(s.createdAt)} · exam year {s.year}{s.region && ` · ${s.region}`}</p>
             </div>
             <button onClick={() => view(s)} className="text-sm underline">{open === s.id ? "Hide results" : "View results"}</button>
@@ -149,7 +149,7 @@ function Saved({ data, reload }) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {data.saved.map((c) => (
-        <div key={c.collegeId} className="flex items-center justify-between glass-card p-4">
+        <div key={c.collegeId} className="flex items-center justify-between card p-4">
           <div>
             <Link href={`/colleges/${c.collegeId}`} className="font-semibold underline">{c.name}</Link>
             <p className="text-xs text-slate-500">{c.district}</p>
@@ -176,7 +176,7 @@ function Requests({ data, reload }) {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={submit} className="grid max-w-xl gap-2 glass-card p-4">
+      <form onSubmit={submit} className="grid max-w-xl gap-2 card p-4">
         <h3 className="font-bold">Request counselling</h3>
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={3} maxLength={1000} placeholder="What would you like help with? (optional)" className="input" />
         <label className="flex items-start gap-2 text-sm">
@@ -191,7 +191,7 @@ function Requests({ data, reload }) {
       {data.requests.length === 0 ? <p className="text-sm text-slate-500">No requests yet.</p> : (
         <div className="space-y-2">
           {data.requests.map((r) => (
-            <div key={r.id} className="glass-card p-4 text-sm">
+            <div key={r.id} className="card p-4 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold">Requested {fmt(r.createdAt)}</p>
                 <span className="rounded-full bg-white/50 px-3 py-0.5 text-xs font-semibold">{statusLabel[r.status] || r.status}</span>
@@ -269,7 +269,7 @@ function Profile({ data, reload, onSignedOut }) {
 
 function Empty({ text, cta }) {
   return (
-    <div className="glass-card p-6 text-sm text-slate-600">
+    <div className="card p-6 text-sm text-slate-600">
       <p>{text}</p>
       <Link href={cta[0]} className="btn btn-accent mt-3 text-sm">{cta[1]}</Link>
     </div>

@@ -21,7 +21,7 @@ export default function Courses() {
           <h2 className="text-xl font-bold">{label}</h2>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             {courses.filter((c) => c.stream === key).map((c) => (
-              <div key={c.id} className="glass-card p-4">
+              <div key={c.id} className="card p-4">
                 <p className="font-semibold">{c.name}</p>
                 <p className="text-xs text-slate-500">{c.degree}</p>
                 {c.eligibility && <p className="mt-2 text-sm text-slate-600">{c.eligibility}</p>}

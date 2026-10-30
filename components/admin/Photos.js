@@ -8,6 +8,7 @@ export default function Photos() {
   const [colleges, setColleges] = useState([]);
   const [collegeId, setCollegeId] = useState("");
   const [caption, setCaption] = useState("");
+  const [slot, setSlot] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -33,6 +34,7 @@ export default function Photos() {
       body.append("file", file);
       body.append("collegeId", collegeId);
       body.append("caption", caption);
+      body.append("slot", collegeId ? "" : slot);
       const res = await fetch("/api/admin/photos", { method: "POST", body });
       if (res.ok) done++;
       else errors.push(`${file.name}: ${(await res.json().catch(() => ({}))).error || "failed"}`);
@@ -55,14 +57,20 @@ export default function Photos() {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={upload} className="grid max-w-2xl gap-2 glass-card p-4">
+      <form onSubmit={upload} className="grid max-w-2xl gap-2 card p-4">
         <h3 className="font-bold">Upload photos</h3>
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="input" />
         <select value={collegeId} onChange={(e) => setCollegeId(e.target.value)} className="input">
           <option value="">General (shows in the site gallery)</option>
           {colleges.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Caption (optional)" className="input" maxLength={150} />
+        {!collegeId && (
+          <select value={slot} onChange={(e) => setSlot(e.target.value)} className="input" aria-label="Where to show this photo">
+            <option value="">Gallery photo</option>
+            <option value="hero">Homepage hero image (replaces the current one)</option>
+          </select>
+        )}
+        <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Caption / alt text (describe the photo)" className="input" maxLength={150} />
         <p className="text-xs text-slate-500">JPG, PNG or WebP, up to 5 MB each. Only upload photos you have the right to use.</p>
         <button disabled={busy} className="btn btn-accent text-sm disabled:opacity-60">{busy ? "Uploading..." : "Upload"}</button>
         {msg?.note && <p className="text-sm text-green-700">{msg.note}</p>}
@@ -76,10 +84,10 @@ export default function Photos() {
           <option value="general">General</option>
           {colleges.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        {shown.length === 0 && <p className="glass-card p-6 text-slate-500">No photos yet.</p>}
+        {shown.length === 0 && <p className="card p-6 text-slate-500">No photos yet.</p>}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {shown.map((p) => (
-            <div key={p.id} className="overflow-hidden glass-card">
+            <div key={p.id} className="overflow-hidden card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.url} alt={p.caption || "Uploaded photo"} className="h-32 w-full object-cover" />
               <div className="p-2 text-xs">

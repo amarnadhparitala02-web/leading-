@@ -19,7 +19,7 @@ export default function About() {
         <li>Web counselling and web options support</li>
         <li>Help with certificate verification and admission</li>
       </ul>
-      <p className="mt-8 glass-card p-4 text-sm text-slate-600">
+      <p className="mt-8 card p-4 text-sm text-slate-600">
         Founder story, team, experience and genuine student testimonials will be added here.
       </p>
       <div className="-mx-4"><Gallery /></div>
