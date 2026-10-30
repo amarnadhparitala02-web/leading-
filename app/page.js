@@ -4,27 +4,23 @@ import { FinalCta, ForParents, HowWeHelp } from "@/components/home/HelpAndParent
 import HomeHero from "@/components/home/HomeHero";
 import JourneyTimeline from "@/components/home/JourneyTimeline";
 import PathCards from "@/components/home/PathCards";
-import RankPanel from "@/components/home/RankPanel";
 import StoriesPreview from "@/components/home/StoriesPreview";
-import Ticker from "@/components/home/Ticker";
+import TrustStrip from "@/components/home/TrustStrip";
 import Gallery from "@/components/Gallery";
 
 // Story order follows the redesign plan: the moment after +2, the journey, the course paths,
-// the rank checker and college discovery, real stories, how we help, parents, and a closing call to action.
+// the rank checker (in the hero) and college discovery, real stories, how we help, parents, and a closing call to action.
 export default function Home() {
   return (
     <>
       <HomeHero />
-      <Ticker />
+      <TrustStrip />
       <AfterPlusTwo />
       <JourneyTimeline />
       <PathCards />
-      <section className="bg-[#d6f5ec] py-16 md:py-20">
+      <section className="bg-soft py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-4">
-          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-            <RankPanel />
-            <DiscoverColleges />
-          </div>
+          <DiscoverColleges />
         </div>
       </section>
       <StoriesPreview />

@@ -20,14 +20,13 @@ export default function RankPanel() {
   }
 
   return (
-    <form onSubmit={go} className="on-dark rounded-[1.75rem] border-4 border-ink bg-gradient-to-br from-[#1d2a8c] to-[#2a45e0] p-6 text-white shadow-[8px_8px_0_var(--ink)] md:p-8" aria-labelledby="rank-title">
-      <h2 id="rank-title" className="text-2xl">Check your EAPCET rank</h2>
-      <p className="mt-2 text-sm text-white/80">
-        Your rank is one part of your story. Explore college possibilities using your rank, category, course and
-        historical cutoff information.
+    <form onSubmit={go} className="rounded-2xl bg-white p-6 text-slate-800 shadow-[0_24px_60px_rgba(3,10,30,0.35)] md:p-7" aria-labelledby="rank-title">
+      <h2 id="rank-title" className="!text-brand text-xl">Check your EAPCET rank</h2>
+      <p className="mt-1.5 text-sm text-slate-600">
+        Explore college possibilities using your rank, category and historical cutoff information.
       </p>
 
-      <div role="radiogroup" aria-label="Exam" className="mt-5 inline-flex rounded-full bg-white/10 p-1">
+      <div role="radiogroup" aria-label="Exam" className="mt-5 grid grid-cols-2 rounded-lg bg-soft p-1">
         {EXAMS.slice().reverse().map((x) => (
           <button
             key={x}
@@ -35,33 +34,33 @@ export default function RankPanel() {
             role="radio"
             aria-checked={exam === x}
             onClick={() => setExam(x)}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${exam === x ? "bg-accent text-brand" : "text-white/85 hover:bg-white/10"}`}
+            className={`rounded-md px-3 py-2 text-sm font-semibold transition ${exam === x ? "bg-brand text-white shadow-sm" : "text-brand hover:bg-white"}`}
           >
             {x}
           </button>
         ))}
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="text-sm">
-          <span className="mb-1 block text-white/80">Stream</span>
+          <span className="mb-1 block font-medium text-brand">Stream</span>
           <select value={stream} onChange={(e) => setStream(e.target.value)} className="input">
             {Object.entries(STREAMS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-white/80">Category</span>
+          <span className="mb-1 block font-medium text-brand">Category</span>
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
             {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
         <label className="text-sm sm:col-span-2">
-          <span className="mb-1 block text-white/80">Your rank</span>
+          <span className="mb-1 block font-medium text-brand">Your rank</span>
           <input value={rank} onChange={(e) => setRank(e.target.value.replace(/\D/g, "").slice(0, 7))} inputMode="numeric" placeholder="Enter your rank" className="input" />
         </label>
       </div>
-      <button className="btn btn-leaf mt-5 w-full">Get college suggestions</button>
-      <p className="mt-3 text-xs text-white/70">
+      <button className="btn btn-accent mt-5 w-full">Get college suggestions</button>
+      <p className="mt-3 text-xs text-slate-500">
         Suggestions are indicative. They are based on historical cutoffs and depend on current official counselling rules and data.
       </p>
     </form>
