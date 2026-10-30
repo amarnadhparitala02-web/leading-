@@ -37,11 +37,26 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 Edit `lib/site.js` to set the phone number, WhatsApp number, email, address and hours. The call and WhatsApp buttons appear once a number is set.
 
-## Data
+## Data (Supabase)
 
-For now, data is stored as JSON files in `data/` and uploaded photos in `data/uploads/`. Both are git-ignored. This is fine for testing, but move to a real database (the tables are laid out to map to MySQL) and cloud storage before a real launch, because most hosts do not keep files between restarts.
+The site stores its data in **Supabase** (PostgreSQL) and its uploaded photos in a private Supabase **Storage** bucket named `photos`. Add these to `.env.local` (never commit it):
 
-Cutoff, college and fee data shown on the site must be verified. The "demo data" button in the admin Cutoffs tab loads clearly labelled DEMO records for testing only.
+```
+SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=the secret service_role key (server only, never in browser code)
+DATABASE_URL=postgresql://postgres:YOUR-PASSWORD@db.YOUR-PROJECT.supabase.co:5432/postgres   # only for the setup script
+```
+
+First-time setup:
+
+```bash
+node scripts/setup-supabase.mjs        # creates the tables and functions (supabase/schema.sql)
+node scripts/migrate-to-supabase.mjs   # optional: copies existing local data/ and photos into Supabase
+```
+
+Without the two SUPABASE variables the site falls back to JSON files in `data/` (handy for development). Row level security is on and the tables have no public policies, so only the website server, using the service key, can read or write the data.
+
+Cutoff, college and fee data shown on the site must be verified. The "demo data" button in the admin Cutoffs section loads clearly labelled DEMO records for testing only. Keep regular backups (Supabase dashboard, Database, Backups) before launch.
 
 ## Sharing a temporary public link
 

@@ -1,5 +1,5 @@
 import { guard, hashPassword, publicStudent } from "@/lib/auth";
-import { all, patch, save } from "@/lib/db";
+import { all, patch, remove, removeWhere } from "@/lib/db";
 import { json } from "@/lib/validate";
 
 export async function GET(request) {
@@ -31,8 +31,8 @@ export async function DELETE(request) {
   const students = await all("students");
   if (!students.some((s) => s.id === id)) return json({ error: "Not found" }, 404);
   for (const table of ["rankSearches", "saved", "leads"]) {
-    await save(table, (await all(table)).filter((r) => r.studentId !== id));
+    await removeWhere(table, (r) => r.studentId === id);
   }
-  await save("students", students.filter((s) => s.id !== id));
+  await remove("students", id);
   return json({ ok: true });
 }

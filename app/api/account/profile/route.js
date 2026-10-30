@@ -1,5 +1,5 @@
 import { clearStudentCookie, guardStudent, hashPassword, publicStudent, verifyPassword } from "@/lib/auth";
-import { all, patch, save } from "@/lib/db";
+import { patch, remove, removeWhere } from "@/lib/db";
 import { clean, json, rateLimited } from "@/lib/validate";
 
 // Change name and/or password. Changing the password needs the current one.
@@ -33,9 +33,9 @@ export async function DELETE(request) {
 
   const id = g.student.id;
   for (const table of ["rankSearches", "saved", "leads"]) {
-    await save(table, (await all(table)).filter((r) => r.studentId !== id));
+    await removeWhere(table, (r) => r.studentId === id);
   }
-  await save("students", (await all("students")).filter((s) => s.id !== id));
+  await remove("students", id);
 
   const res = json({ ok: true });
   res.headers.append("Set-Cookie", clearStudentCookie);

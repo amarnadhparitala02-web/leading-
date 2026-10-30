@@ -1,5 +1,5 @@
 import { guardStudent } from "@/lib/auth";
-import { all, insert, save } from "@/lib/db";
+import { all, insert, removeWhere } from "@/lib/db";
 import { clean, json } from "@/lib/validate";
 
 // Ids of the colleges this student has saved (used to show the Save button state).
@@ -28,7 +28,6 @@ export async function DELETE(request) {
   const g = await guardStudent(request);
   if (g.error) return g.error;
   const collegeId = new URL(request.url).searchParams.get("collegeId");
-  const rows = await all("saved");
-  await save("saved", rows.filter((s) => !(s.studentId === g.student.id && s.collegeId === collegeId)));
+  await removeWhere("saved", (s) => s.studentId === g.student.id && s.collegeId === collegeId);
   return json({ ok: true });
 }
