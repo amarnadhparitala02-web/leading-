@@ -30,7 +30,7 @@ export default function Header() {
           <img src="/logo.jpg" alt="Leading Light Educational Services" className="h-10 w-auto rounded-md md:h-11" />
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-5 text-sm lg:flex">
+        <nav aria-label="Main" className="hidden items-center gap-0.5 text-sm xl:flex">
           {links.map((l) => (
             <Link key={l.href} href={l.href} className="nav-link" aria-current={current(l.href) ? "page" : undefined}>
               {l.label}
@@ -39,11 +39,11 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <AccountLink className="nav-link hidden text-sm sm:inline" />
-          <Link href="/rank-guidance" className="btn btn-accent !px-4 !py-2 text-sm">Check Your Rank</Link>
+          <AccountLink className="nav-link hidden whitespace-nowrap text-sm xl:inline" />
+          <Link href="/rank-guidance" className="btn btn-accent whitespace-nowrap !px-4 !py-2 text-sm">Check Your Rank</Link>
           <button
             type="button"
-            className="rounded-lg p-2 lg:hidden"
+            className="rounded-lg p-2 xl:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -57,7 +57,7 @@ export default function Header() {
       </div>
 
       {open && (
-        <nav id="mobile-menu" aria-label="Main" className="border-t border-[color:var(--line)] bg-background px-4 pb-4 pt-2 lg:hidden">
+        <nav id="mobile-menu" aria-label="Main" className="border-t border-[color:var(--line)] bg-background px-4 pb-4 pt-2 xl:hidden">
           <ul className="grid grid-cols-2 gap-1 text-sm">
             {links.map((l) => (
               <li key={l.href}>

@@ -37,7 +37,7 @@ export default function CollegeCard({ college: c, showCompare = true }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={c.cover} alt={`${c.name} campus`} loading="lazy" className="h-44 w-full object-cover" />
       ) : (
-        <div className="flex h-44 items-center justify-center bg-gradient-to-br from-[#dfeadb] to-[#c5dcb2] text-brand/70" aria-hidden="true">
+        <div className="flex h-44 items-center justify-center bg-gradient-to-br from-[#dfe4ff] via-[#ece4ff] to-[#ffe1de] text-brand/70" aria-hidden="true">
           <Icon name="building" className="h-14 w-14" />
         </div>
       )}
@@ -45,7 +45,7 @@ export default function CollegeCard({ college: c, showCompare = true }) {
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <h3 className="text-lg font-bold leading-snug text-brand">{c.name}</h3>
-          {c.partner && <span className="shrink-0 rounded-full bg-accent/60 px-2.5 py-0.5 text-xs font-semibold text-brand">Partner</span>}
+          {c.partner && <span className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-ink">Partner</span>}
         </div>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-600">
           <Icon name="pin" className="h-4 w-4" />{place}

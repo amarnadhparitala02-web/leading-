@@ -14,7 +14,8 @@ const official = [
 
 export default function Footer() {
   return (
-    <footer className="on-dark mt-0 bg-[#0c2c24] text-white">
+    <footer className="on-dark relative mt-0 bg-ink text-white">
+      <div className="h-2 w-full bg-gradient-to-r from-[#2a45e0] via-[#7c3aed] via-[#f2483b] to-[#ffc83d]" aria-hidden="true" />
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 text-sm md:grid-cols-2 lg:grid-cols-4">
         <div>
           <div className="inline-block rounded-xl bg-white px-3 py-2">

@@ -6,6 +6,7 @@ import JourneyTimeline from "@/components/home/JourneyTimeline";
 import PathCards from "@/components/home/PathCards";
 import RankPanel from "@/components/home/RankPanel";
 import StoriesPreview from "@/components/home/StoriesPreview";
+import Ticker from "@/components/home/Ticker";
 import Gallery from "@/components/Gallery";
 
 // Story order follows the redesign plan: the moment after +2, the journey, the course paths,
@@ -14,13 +15,16 @@ export default function Home() {
   return (
     <>
       <HomeHero />
+      <Ticker />
       <AfterPlusTwo />
       <JourneyTimeline />
       <PathCards />
-      <section className="mx-auto max-w-6xl px-4 pb-6">
-        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <RankPanel />
-          <DiscoverColleges />
+      <section className="bg-[#d6f5ec] py-16 md:py-20">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            <RankPanel />
+            <DiscoverColleges />
+          </div>
         </div>
       </section>
       <StoriesPreview />

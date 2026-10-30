@@ -20,7 +20,7 @@ export default function RankPanel() {
   }
 
   return (
-    <form onSubmit={go} className="on-dark rounded-[1.75rem] bg-brand p-6 text-white shadow-xl md:p-8" aria-labelledby="rank-title">
+    <form onSubmit={go} className="on-dark rounded-[1.75rem] border-4 border-ink bg-gradient-to-br from-[#1d2a8c] to-[#2a45e0] p-6 text-white shadow-[8px_8px_0_var(--ink)] md:p-8" aria-labelledby="rank-title">
       <h2 id="rank-title" className="text-2xl">Check your EAPCET rank</h2>
       <p className="mt-2 text-sm text-white/80">
         Your rank is one part of your story. Explore college possibilities using your rank, category, course and

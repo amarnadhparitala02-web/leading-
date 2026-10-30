@@ -46,7 +46,7 @@ export default function Stories() {
         ) : (
           stories.map((s) => (
             <article key={s.id} className="card p-7">
-              <span className="text-5xl leading-none text-accent" aria-hidden="true" style={{ fontFamily: "var(--font-playfair)" }}>&ldquo;</span>
+              <span className="text-5xl leading-none text-accent" aria-hidden="true" style={{ fontFamily: "var(--font-display)" }}>&ldquo;</span>
               {s.quote && <blockquote className="-mt-2 text-lg text-brand">{s.quote}</blockquote>}
               <p className="mt-4 font-bold text-brand">{s.displayName}</p>
               <p className="text-xs text-slate-500">{[s.stream, s.year].filter(Boolean).join(" · ")}</p>
