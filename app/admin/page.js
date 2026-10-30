@@ -43,7 +43,7 @@ export default function Admin() {
   const [tab, setTab] = useState("dashboard");
 
   useEffect(() => {
-    api("/api/admin/login").then((r) => setMe(r.ok ? r.data.user : null));
+    api("/api/admin/login").then((r) => setMe(r.data.user || null));
     const t = new URLSearchParams(window.location.search).get("tab");
     if (t && allItems.some((x) => x.key === t)) setTab(t);
   }, []);

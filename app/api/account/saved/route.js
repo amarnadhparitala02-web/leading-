@@ -1,13 +1,13 @@
-import { guardStudent } from "@/lib/auth";
+import { currentStudent, guardStudent } from "@/lib/auth";
 import { all, insert, removeWhere } from "@/lib/db";
 import { clean, json } from "@/lib/validate";
 
 // Ids of the colleges this student has saved (used to show the Save button state).
 export async function GET(request) {
-  const g = await guardStudent(request);
-  if (g.error) return g.error;
-  const ids = (await all("saved")).filter((s) => s.studentId === g.student.id).map((s) => s.collegeId);
-  return json({ ids });
+  const student = await currentStudent(request);
+  if (!student) return json({ signedIn: false, ids: [] });
+  const ids = (await all("saved")).filter((s) => s.studentId === student.id).map((s) => s.collegeId);
+  return json({ signedIn: true, ids });
 }
 
 export async function POST(request) {

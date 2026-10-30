@@ -8,7 +8,7 @@ export default function AccountLink({ className = "" }) {
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    fetch("/api/account/session").then((r) => setSignedIn(r.ok)).catch(() => {});
+    fetch("/api/account/session").then((r) => r.json()).then((d) => setSignedIn(Boolean(d.student))).catch(() => {});
   }, []);
 
   return <Link href="/account" className={className}>{signedIn ? "My account" : "Sign in"}</Link>;

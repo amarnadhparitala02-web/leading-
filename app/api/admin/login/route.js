@@ -5,7 +5,7 @@ import { clean, json, rateLimited } from "@/lib/validate";
 // Who am I? Used by the admin screen to decide whether to show the login form.
 export async function GET(request) {
   const user = await currentUser(request);
-  return user ? json({ user: publicUser(user) }) : json({ error: "Unauthorized" }, 401);
+  return json({ user: user ? publicUser(user) : null });
 }
 
 export async function POST(request) {

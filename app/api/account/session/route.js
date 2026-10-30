@@ -5,7 +5,7 @@ import { canonicalPhone, json, rateLimited } from "@/lib/validate";
 // Who am I? 401 when nobody is signed in.
 export async function GET(request) {
   const s = await currentStudent(request);
-  return s ? json({ student: publicStudent(s) }) : json({ error: "Not signed in" }, 401);
+  return json({ student: s ? publicStudent(s) : null });
 }
 
 export async function POST(request) {

@@ -9,7 +9,8 @@ export default function SaveButton({ collegeId }) {
 
   useEffect(() => {
     fetch("/api/account/saved")
-      .then(async (r) => (r.ok ? { signedIn: true, saved: (await r.json()).ids.includes(collegeId) } : { signedIn: false, saved: false }))
+      .then((r) => r.json())
+      .then((d) => ({ signedIn: Boolean(d.signedIn), saved: (d.ids || []).includes(collegeId) }))
       .catch(() => ({ signedIn: false, saved: false }))
       .then((s) => setState({ ready: true, ...s }));
   }, [collegeId]);
@@ -27,10 +28,10 @@ export default function SaveButton({ collegeId }) {
 
   if (!state.ready) return null;
   if (!state.signedIn) {
-    return <Link href="/account" className="btn border border-brand/25 bg-white/60 text-sm">Sign in to save</Link>;
+    return <Link href="/account" className="btn btn-brand text-sm">Sign in to save</Link>;
   }
   return (
-    <button onClick={toggle} className={`btn text-sm ${state.saved ? "bg-brand text-white" : "border border-brand/25 bg-white/60"}`}>
+    <button onClick={toggle} className={`btn text-sm ${state.saved ? "btn-brand" : "btn-outline"}`}>
       {state.saved ? "Saved ✓" : "Save college"}
     </button>
   );
