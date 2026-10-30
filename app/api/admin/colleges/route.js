@@ -1,23 +1,48 @@
 import { guard } from "@/lib/auth";
 import { all, insert, patch, save } from "@/lib/db";
 import { deletePhotoFile } from "@/lib/photos";
-import { STATES } from "@/lib/site";
+import { COLLEGE_TYPES, STATES } from "@/lib/site";
 import { clean, json } from "@/lib/validate";
 
+// Per-course details an admin can fill in for one college. Anything left blank is simply not shown.
+function cleanCourseDetails(raw, courseIds) {
+  const out = {};
+  for (const id of courseIds) {
+    const d = raw?.[id] || {};
+    out[id] = {
+      duration: clean(d.duration, 40),
+      fee: clean(d.fee, 80),
+      feeVerifiedOn: clean(d.feeVerifiedOn, 10),
+      seats: clean(d.seats, 20),
+      eligibility: clean(d.eligibility, 200),
+      note: clean(d.note, 300),
+    };
+  }
+  return out;
+}
+
 function fromBody(b) {
+  const courseIds = Array.isArray(b.courseIds) ? [...new Set(b.courseIds.map((c) => clean(c, 80)).filter(Boolean))] : [];
   return {
     name: clean(b.name, 150),
     state: STATES.includes(b.state) ? b.state : "",
     district: clean(b.district, 60),
     address: clean(b.address, 300),
     website: /^https?:\/\//i.test(String(b.website || "")) ? clean(b.website, 200) : "",
-    description: clean(b.description, 2000),
-    facilities: Array.isArray(b.facilities) ? b.facilities.map((f) => clean(f, 60)).filter(Boolean) : [],
+    summary: clean(b.summary, 500),
+    description: clean(b.description, 4000),
+    type: COLLEGE_TYPES.includes(b.type) ? b.type : "",
+    established: clean(b.established, 10),
+    affiliation: clean(b.affiliation, 150),
+    accreditation: clean(b.accreditation, 150),
+    highlights: Array.isArray(b.highlights) ? b.highlights.map((h) => clean(h, 120)).filter(Boolean).slice(0, 8) : [],
+    facilities: Array.isArray(b.facilities) ? b.facilities.map((f) => clean(f, 60)).filter(Boolean).slice(0, 30) : [],
     feeNote: clean(b.feeNote, 300),
     feeVerifiedOn: clean(b.feeVerifiedOn, 10),
     active: b.active !== false,
     partnership: { mou: Boolean(b.partnership?.mou), displayPublic: Boolean(b.partnership?.displayPublic) },
-    courseIds: Array.isArray(b.courseIds) ? b.courseIds.map((c) => clean(c, 80)) : [],
+    courseIds,
+    courseDetails: cleanCourseDetails(b.courseDetails, courseIds),
   };
 }
 

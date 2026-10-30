@@ -4,33 +4,32 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import AccountLink from "@/components/AccountLink";
+import { useSettings } from "@/components/SettingsProvider";
 
-// Simple, plan-specified navigation. "Check Your Rank" stays one tap away on every screen size.
+// Simple navigation. Courses are shown inside each college, so there is no separate Courses page.
 const links = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/courses", label: "Courses" },
   { href: "/colleges", label: "Colleges" },
   { href: "/rank-guidance", label: "Rank Checker" },
-  { href: "/services", label: "Services" },
-  { href: "/stories", label: "Stories" },
   { href: "/contact", label: "Contact" },
 ];
 
 export default function Header() {
   const path = usePathname();
+  const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const current = (href) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
 
   return (
     <header className="site-header sticky top-0 z-30">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5">
-        <Link href="/" aria-label="Leading Light Educational Services, home" onClick={() => setOpen(false)}>
+        <Link href="/" aria-label={`${settings.name}, home`} onClick={() => setOpen(false)}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="Leading Light Educational Services" className="h-10 w-auto rounded-md md:h-11" />
+          <img src="/logo.jpg" alt={settings.name} className="h-10 w-auto rounded-md md:h-11" />
         </Link>
 
-        <nav aria-label="Main" className="hidden items-center gap-0.5 text-sm xl:flex">
+        <nav aria-label="Main" className="hidden items-center gap-1 text-sm md:flex">
           {links.map((l) => (
             <Link key={l.href} href={l.href} className="nav-link" aria-current={current(l.href) ? "page" : undefined}>
               {l.label}
@@ -39,11 +38,11 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <AccountLink className="nav-link hidden whitespace-nowrap text-sm xl:inline" />
+          <AccountLink className="nav-link hidden whitespace-nowrap text-sm md:inline" />
           <Link href="/rank-guidance" className="btn btn-accent whitespace-nowrap !px-4 !py-2 text-sm">Check Your Rank</Link>
           <button
             type="button"
-            className="rounded-lg p-2 xl:hidden"
+            className="rounded-lg p-2 md:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -57,7 +56,7 @@ export default function Header() {
       </div>
 
       {open && (
-        <nav id="mobile-menu" aria-label="Main" className="border-t border-[color:var(--line)] bg-background px-4 pb-4 pt-2 xl:hidden">
+        <nav id="mobile-menu" aria-label="Main" className="border-t border-[color:var(--line)] bg-white px-4 pb-4 pt-2 md:hidden">
           <ul className="grid grid-cols-2 gap-1 text-sm">
             {links.map((l) => (
               <li key={l.href}>

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CATEGORIES, EXAMS, GENDERS, STREAMS, waHref } from "@/lib/site";
+import { useSettings } from "@/components/SettingsProvider";
+import { CATEGORIES, EXAMS, GENDERS, STREAMS } from "@/lib/site";
+import { waHref } from "@/lib/settings";
 
 const thisYear = 2026;
 const WA_MSG = "Hi, I checked my rank on your website and need guidance.";
@@ -18,6 +20,7 @@ function Field({ label, children, hint }) {
 }
 
 export default function RankChecker() {
+  const { settings } = useSettings();
   const [state, setState] = useState("idle");
   const [error, setError] = useState("");
   const [out, setOut] = useState(null);
@@ -129,8 +132,8 @@ export default function RankChecker() {
           ) : (
             <button onClick={requestCounselling} className="btn btn-accent">Request counselling</button>
           )}
-          {waHref(WA_MSG) && (
-            <a href={waHref(WA_MSG)} target="_blank" rel="noopener noreferrer" className="btn bg-[#25D366] text-white">Chat on WhatsApp</a>
+          {waHref(settings, WA_MSG) && (
+            <a href={waHref(settings, WA_MSG)} target="_blank" rel="noopener noreferrer" className="btn bg-[#25D366] text-white">Chat on WhatsApp</a>
           )}
           <Link href="/colleges" className="btn btn-outline">Browse all colleges</Link>
           <button onClick={() => { setOut(null); setRequested(false); }} className="btn btn-brand">New search</button>

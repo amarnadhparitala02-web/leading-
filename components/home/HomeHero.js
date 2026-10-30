@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Icon from "@/components/Icons";
 import RankPanel from "@/components/home/RankPanel";
+import { useSettings } from "@/components/SettingsProvider";
 
 // Deep navy hero with the rank checker beside the headline. When a real photo is uploaded in the
 // admin Photos tab (slot: Homepage hero), it becomes the hero background under a navy overlay.
 export default function HomeHero() {
+  const { settings } = useSettings();
   const [hero, setHero] = useState(null);
 
   useEffect(() => {
@@ -37,14 +39,12 @@ export default function HomeHero() {
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
-          <p className="eyebrow">Your +2 journey is complete</p>
+          <p className="eyebrow">{settings.hero.eyebrow}</p>
           <h1 className="mt-5 text-4xl leading-[1.08] md:text-6xl">
-            Your future journey <span className="text-[#9fc0ff]">starts here.</span>
+            {settings.hero.headline}{" "}
+            {settings.hero.highlight && <span className="text-[#9fc0ff]">{settings.hero.highlight}</span>}
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-            From choosing the right course to finding a college that fits your goals, we help you understand your
-            options and take the next step with confidence.
-          </p>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">{settings.hero.text}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#journey" className="btn btn-accent whitespace-nowrap">
               Explore Your Journey <Icon name="arrow" className="h-4 w-4" />

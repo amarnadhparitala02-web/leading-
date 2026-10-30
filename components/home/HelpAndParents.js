@@ -2,41 +2,6 @@ import Link from "next/link";
 import Icon from "@/components/Icons";
 import Reveal from "@/components/Reveal";
 
-export const services = [
-  ["users", "Personalised counselling", "One-to-one guidance based on your stream, interests and goals."],
-  ["chart", "Rank analysis", "Understand what your EAPCET rank can mean, using historical cutoffs."],
-  ["building", "College suggestions", "Options that fit your rank, course and location, with verified details."],
-  ["doc", "Application and document support", "Clear checklists and help preparing for each step."],
-  ["shield", "Admission guidance", "Support through counselling milestones and admission confirmation."],
-  ["heart", "Follow-up and support", "We stay in touch, so you are never left guessing what comes next."],
-];
-
-export function HowWeHelp() {
-  return (
-    <section className="bg-soft py-16 md:py-24">
-      <div className="mx-auto max-w-6xl px-4">
-        <Reveal>
-          <p className="eyebrow">How we help</p>
-          <h2 className="mt-4 max-w-3xl text-3xl md:text-5xl">More than guidance. A support system.</h2>
-        </Reveal>
-        <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map(([icon, title, text], i) => (
-            <li key={title}>
-              <Reveal delay={i * 60}>
-                <div className="card h-full p-6">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-soft text-moss"><Icon name={icon} className="h-6 w-6" /></span>
-                  <h3 className="mt-4 text-base font-bold text-brand">{title}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{text}</p>
-                </div>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 const promises = [
   "Verified college and cutoff data",
   "A transparent counselling process",

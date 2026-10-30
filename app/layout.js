@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactButtons from "@/components/ContactButtons";
+import SettingsProvider from "@/components/SettingsProvider";
 
 const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"], display: "swap" });
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${jakarta.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        <SettingsProvider>
         <a href="#main" className="skip-link">Skip to main content</a>
         <Suspense fallback={<div className="site-header sticky top-0 z-30 h-16" aria-hidden="true" />}>
           <Header />
@@ -24,6 +26,7 @@ export default function RootLayout({ children }) {
         <main id="main" className="flex-1">{children}</main>
         <Footer />
         <ContactButtons />
+        </SettingsProvider>
       </body>
     </html>
   );

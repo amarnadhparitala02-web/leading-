@@ -16,7 +16,11 @@ export async function POST(request) {
   const name = clean(b.name, 120);
   if (!name || !STREAMS[b.stream]) return json({ error: "Name and stream are required" }, 400);
   // Persist the seeded list first so later reads return seed + new course.
-  await save("courses", await all("courses"));
+  const existing = await all("courses");
+  await save("courses", existing);
+  // Adding a course from a college form is safe to repeat: the same name and stream returns the existing course.
+  const same = existing.find((c) => c.stream === b.stream && c.name.toLowerCase() === name.toLowerCase());
+  if (same) return json({ course: same, existed: true });
   const course = await insert("courses", {
     name, stream: b.stream, degree: clean(b.degree, 40), eligibility: clean(b.eligibility, 300), active: true,
   });

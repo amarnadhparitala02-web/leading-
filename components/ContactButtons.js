@@ -1,10 +1,14 @@
-import { telHref, waHref } from "@/lib/site";
-import Icon from "@/components/Icons";
+"use client";
 
-// Floating WhatsApp and call buttons. Each shows only when its number is set in lib/site.js.
+import Icon from "@/components/Icons";
+import { useSettings } from "@/components/SettingsProvider";
+import { telHref, waHref } from "@/lib/settings";
+
+// Floating WhatsApp and call buttons. Each shows only when its number is set in the admin settings.
 export default function ContactButtons() {
-  const wa = waHref();
-  const tel = telHref();
+  const { settings } = useSettings();
+  const wa = waHref(settings);
+  const tel = telHref(settings);
   if (!wa && !tel) return null;
 
   return (

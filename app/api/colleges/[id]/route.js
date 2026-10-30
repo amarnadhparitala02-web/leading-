@@ -3,6 +3,8 @@ import { photoUrl } from "@/lib/photos";
 import { DEFAULT_EXAM } from "@/lib/site";
 import { publicCollege } from "@/lib/public";
 
+// One college: its summary and facts, its courses (with the details an admin entered), the
+// verified cutoff history per course, and its photos.
 export async function GET(request, { params }) {
   const { id } = await params;
   const [colleges, courses, cutoffs, photos] = await Promise.all([all("colleges"), all("courses"), all("cutoffs"), all("photos")]);
@@ -13,6 +15,7 @@ export async function GET(request, { params }) {
   const history = cutoffs
     .filter((c) => c.collegeId === id && c.verified)
     .map((c) => ({
+      courseId: c.courseId,
       course: courseById.get(c.courseId)?.name || "",
       year: c.year,
       round: c.round,

@@ -1,12 +1,13 @@
 import { guard } from "@/lib/auth";
-import { all, insertMany } from "@/lib/db";
+import { all, insertMany, save } from "@/lib/db";
 import { parseCsv } from "@/lib/csv";
-import { STATES } from "@/lib/site";
+import { randomUUID } from "crypto";
+import { STATES, STREAMS } from "@/lib/site";
 import { clean, json } from "@/lib/validate";
 
 const REQUIRED = ["name", "district"];
 
-// CSV columns: name, district, address, website, description, courses, partner, state (optional: Telangana or Andhra Pradesh)
+// CSV columns: name, district, address, website, description, courses, partner, state, summary, stream (the last three are optional)
 //   courses: course names separated by ; (must already exist under Courses)
 //   partner: yes/no. "yes" records the MOU but does NOT make it public; an admin
 //            must tick public display on the college so only confirmed partners show.
@@ -31,6 +32,7 @@ export async function POST(request) {
   const errors = [];
   const skipped = [];
   const warnings = [];
+  const newCourses = [];
 
   lines.forEach((cells, i) => {
     const r = Object.fromEntries(cols.map((c, j) => [c, clean(cells[j], 2000)]));
@@ -45,7 +47,14 @@ export async function POST(request) {
     for (const n of (r.courses || "").split(";").map((s) => s.trim()).filter(Boolean)) {
       const id = courseId.get(n.toLowerCase());
       if (id) ids.push(id);
-      else warnings.push(`Line ${line} (${name}): course "${n}" not found, left out`);
+      else {
+        // Unknown course: create it so the import never loses data. Stream comes from the optional stream column.
+        const created = { id: randomUUID(), createdAt: new Date().toISOString(), name: n, stream: STREAMS[r.stream] ? r.stream : "btech", degree: "", eligibility: "", active: true };
+        newCourses.push(created);
+        courseId.set(n.toLowerCase(), created.id);
+        ids.push(created.id);
+        warnings.push(`Line ${line} (${name}): new course "${n}" was added (${STREAMS[created.stream]})`);
+      }
     }
 
     good.push({
@@ -53,6 +62,7 @@ export async function POST(request) {
       state: STATES.find((x) => x.toLowerCase() === (r.state || "").toLowerCase()) || "",
       address: clean(r.address, 300),
       website: /^https?:\/\//i.test(r.website || "") ? clean(r.website, 200) : "",
+      summary: clean(r.summary, 500),
       description: clean(r.description, 2000),
       facilities: [], feeNote: "", feeVerifiedOn: "",
       active: true,
@@ -61,6 +71,7 @@ export async function POST(request) {
     });
   });
 
+  if (newCourses.length) await save("courses", [...courses, ...newCourses]);
   if (good.length) await insertMany("colleges", good);
   return json({ imported: good.length, skipped, errors, warnings });
 }
