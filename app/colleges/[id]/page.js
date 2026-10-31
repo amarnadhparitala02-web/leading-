@@ -6,6 +6,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import Gallery from "@/components/Gallery";
 import Icon from "@/components/Icons";
 import SaveButton from "@/components/SaveButton";
+import { useSettings } from "@/components/SettingsProvider";
+import { telHref, waHref } from "@/lib/settings";
 import { getCompare, MAX_COMPARE, setCompare } from "@/lib/compare";
 import { STREAMS } from "@/lib/site";
 
@@ -103,6 +105,7 @@ function CourseDetails({ course, cutoffs }) {
 
 function CollegeDetails() {
   const { id } = useParams();
+  const { settings } = useSettings();
   const [data, setData] = useState(undefined);
   const [selected, setSelected] = useState(null);
 
@@ -127,106 +130,140 @@ function CollegeDetails() {
 
   const { college: c, cutoffs, photos } = data;
   const place = [c.district, c.state].filter(Boolean).join(", ");
-  const hasFacts = c.type || c.established || c.affiliation || c.accreditation || place || c.website;
+  const tel = telHref(settings);
+  const wa = waHref(settings, `Hi, I would like guidance about ${c.name}.`);
+  const cover = photos[0];
+  const badges = [c.type, c.accreditation].filter(Boolean);
+  const tiles = [
+    ["Established", c.established],
+    ["Courses", c.courses.length ? String(c.courses.length) : ""],
+    ["Location", place],
+    ["Approvals", c.affiliation],
+  ].filter(([, v]) => v);
+  const sections = [
+    ["overview", "Overview", true],
+    ["courses", "Courses", true],
+    ["facilities", "Facilities", c.facilities.length > 0],
+    ["photos", "Photos", photos.length > 0],
+  ].filter(([, , show]) => show);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-      <Link href="/colleges" className="text-sm font-semibold text-moss underline">← All colleges</Link>
-
-      <header className="mt-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl md:text-5xl">{c.name}</h1>
-          {c.partner && <span className="rounded-md bg-accent px-2.5 py-1 text-xs font-semibold text-brand">Partner college</span>}
-        </div>
-        <p className="mt-2 flex items-center gap-1.5 text-slate-600"><Icon name="pin" className="h-4 w-4" />{place}{c.address ? ` · ${c.address}` : ""}</p>
-        {c.summary && <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-700">{c.summary}</p>}
-        <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Link href="/contact" className="btn btn-accent">Request counselling</Link>
-          <CompareToggle id={c.id} />
-          <SaveButton collegeId={c.id} />
-        </div>
-      </header>
-
-      {(hasFacts || c.highlights.length > 0) && (
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          {hasFacts && (
-            <section className="card p-6" aria-labelledby="facts-title">
-              <h2 id="facts-title" className="text-xl">College at a glance</h2>
-              <dl className="mt-4 grid gap-5 sm:grid-cols-2">
-                <Fact label="Type" value={c.type} />
-                <Fact label="Established" value={c.established} />
-                <Fact label="Affiliation / approvals" value={c.affiliation} />
-                <Fact label="Accreditation" value={c.accreditation} />
-                <Fact label="Location" value={place} />
-                {c.website && (
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">Website</dt>
-                    <dd className="mt-0.5"><a href={c.website} target="_blank" rel="noopener noreferrer" className="font-medium text-moss underline">Official website</a></dd>
-                  </div>
-                )}
-              </dl>
-            </section>
-          )}
-          {c.highlights.length > 0 && (
-            <section className="panel-soft p-6" aria-labelledby="hl-title">
-              <h2 id="hl-title" className="text-xl">Highlights</h2>
-              <ul className="mt-4 space-y-2.5">
-                {c.highlights.map((h) => (
-                  <li key={h} className="flex items-start gap-2.5 text-sm text-slate-700">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-white"><Icon name="check" className="h-3.5 w-3.5" /></span>{h}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
-      )}
-
-      {c.description && (
-        <section className="mt-10" aria-labelledby="about-title">
-          <h2 id="about-title" className="text-2xl">About {c.name}</h2>
-          <p className="mt-3 max-w-4xl whitespace-pre-line leading-relaxed text-slate-700">{c.description}</p>
-        </section>
-      )}
-
-      <section className="mt-10" aria-labelledby="courses-title">
-        <h2 id="courses-title" className="text-2xl">Courses offered</h2>
-        {c.courses.length === 0 ? (
-          <p className="panel-soft mt-4 p-6 text-slate-600">The course list for this college has not been added yet. Please ask a counsellor.</p>
-        ) : (
-          <div className="mt-5 grid gap-5 lg:grid-cols-[18rem_1fr]">
-            <ul className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible" role="tablist" aria-label="Courses">
-              {c.courses.map((x) => (
-                <li key={x.id} className="shrink-0 lg:shrink">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={selected === x.id}
-                    onClick={() => setSelected(x.id)}
-                    className={`w-full rounded-lg border px-4 py-3 text-left transition ${selected === x.id ? "border-brand bg-brand text-white shadow" : "border-[color:var(--line)] bg-white text-brand hover:border-[#9fb8e6]"}`}
-                  >
-                    <span className="block font-semibold leading-snug">{x.name}</span>
-                    <span className={`block text-xs ${selected === x.id ? "text-white/75" : "text-slate-500"}`}>{STREAMS[x.stream] || x.stream}{x.duration ? ` · ${x.duration}` : ""}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="card p-6" role="tabpanel">
-              {course && <CourseDetails course={course} cutoffs={cutoffs} />}
-            </div>
-          </div>
+    <div>
+      <section className="on-dark relative overflow-hidden bg-brand text-white">
+        {cover && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover.url} alt={cover.caption || `${c.name} campus`} className="absolute inset-0 h-full w-full object-cover" />
         )}
-        {c.feeNote && <p className="panel-soft mt-5 p-4 text-sm"><b>Fees note:</b> {c.feeNote}{c.feeVerifiedOn && ` (verified ${c.feeVerifiedOn})`}</p>}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(11,31,75,0.35) 0%, rgba(11,31,75,0.92) 100%)" }} aria-hidden="true" />
+        <div className="relative mx-auto flex min-h-[22rem] max-w-6xl flex-col justify-end px-4 pb-8 pt-16 md:min-h-[26rem] md:pb-10">
+          <Link href="/colleges" className="absolute left-4 top-5 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold text-white backdrop-blur hover:bg-white/25">← All colleges</Link>
+          <div className="flex flex-wrap gap-2">
+            {badges.map((b) => <span key={b} className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">{b}</span>)}
+            {c.partner && <span className="rounded-full bg-coral px-3 py-1 text-xs font-semibold">Partner college</span>}
+          </div>
+          <h1 className="mt-3 max-w-4xl text-3xl leading-tight md:text-5xl">{c.name}</h1>
+          <p className="mt-2 flex items-center gap-1.5 text-white/85"><Icon name="pin" className="h-4 w-4" />{place}{c.address ? ` · ${c.address}` : ""}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <Link href="/contact" className="btn btn-accent">Request counselling</Link>
+            {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="btn btn-light">WhatsApp us</a>}
+            {tel && <a href={tel} className="btn btn-light">Call</a>}
+          </div>
+        </div>
       </section>
 
-      {c.facilities.length > 0 && (
-        <section className="mt-10" aria-labelledby="fac-title">
-          <h2 id="fac-title" className="text-2xl">Facilities</h2>
-          <ul className="mt-3 flex flex-wrap gap-2">{c.facilities.map((x) => <li key={x} className="rounded-full bg-soft px-3 py-1 text-sm text-brand">{x}</li>)}</ul>
-        </section>
-      )}
+      <div className="sticky top-16 z-20 border-b border-[color:var(--line)] bg-white/95 backdrop-blur">
+        <nav aria-label="College sections" className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4">
+          {sections.map(([key, label]) => (
+            <a key={key} href={`#${key}`} className="shrink-0 border-b-2 border-transparent px-3 py-3 text-sm font-semibold text-slate-600 hover:border-brand hover:text-brand">{label}</a>
+          ))}
+          <span className="ml-auto flex shrink-0 items-center gap-2 py-2 pl-4">
+            <CompareToggle id={c.id} />
+            <SaveButton collegeId={c.id} />
+          </span>
+        </nav>
+      </div>
 
-      {photos.length > 0 && <div className="-mx-4 mt-6"><Gallery photos={photos} title="Photos" /></div>}
+      <div className="mx-auto max-w-6xl px-4 py-10 md:py-12">
+        {tiles.length > 0 && (
+          <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {tiles.map(([l, v]) => (
+              <div key={l} className="rounded-2xl bg-soft p-4">
+                <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">{l}</dt>
+                <dd className="mt-1 font-bold text-brand">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
+        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_20rem]">
+          <div className="min-w-0 space-y-12">
+            <section id="overview" className="scroll-mt-32">
+              <h2 className="text-2xl">About {c.name}</h2>
+              {c.summary && <p className="mt-3 text-lg leading-relaxed text-slate-700">{c.summary}</p>}
+              {c.description && <p className="mt-3 whitespace-pre-line leading-relaxed text-slate-700">{c.description}</p>}
+              {c.highlights.length > 0 && (
+                <ul className="mt-5 grid gap-2.5 sm:grid-cols-2">
+                  {c.highlights.map((h) => (
+                    <li key={h} className="flex items-start gap-2.5 rounded-xl bg-soft p-3 text-sm text-slate-700">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-white"><Icon name="check" className="h-3.5 w-3.5" /></span>{h}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {c.website && <a href={c.website} target="_blank" rel="noopener noreferrer" className="btn btn-outline mt-5 text-sm">Visit official website ↗</a>}
+            </section>
+
+            <section id="courses" className="scroll-mt-32">
+              <h2 className="text-2xl">Courses offered</h2>
+              {c.courses.length === 0 ? (
+                <p className="panel-soft mt-4 p-6 text-slate-600">The course list for this college has not been added yet. Please ask a counsellor.</p>
+              ) : (
+                <div className="mt-5 grid gap-5 xl:grid-cols-[16rem_1fr]">
+                  <ul className="flex gap-2 overflow-x-auto pb-1 xl:flex-col xl:overflow-visible" role="tablist" aria-label="Courses">
+                    {c.courses.map((x) => (
+                      <li key={x.id} className="shrink-0 xl:shrink">
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={selected === x.id}
+                          onClick={() => setSelected(x.id)}
+                          className={`w-full rounded-lg border px-4 py-3 text-left transition ${selected === x.id ? "border-brand bg-brand text-white shadow" : "border-[color:var(--line)] bg-white text-brand hover:border-[#9fb8e6]"}`}
+                        >
+                          <span className="block font-semibold leading-snug">{x.name}</span>
+                          <span className={`block text-xs ${selected === x.id ? "text-white/75" : "text-slate-500"}`}>{STREAMS[x.stream] || x.stream}{x.duration ? ` · ${x.duration}` : ""}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="card p-6" role="tabpanel">
+                    {course && <CourseDetails course={course} cutoffs={cutoffs} />}
+                  </div>
+                </div>
+              )}
+              {c.feeNote && <p className="panel-soft mt-5 p-4 text-sm"><b>Fees note:</b> {c.feeNote}{c.feeVerifiedOn && ` (verified ${c.feeVerifiedOn})`}</p>}
+            </section>
+
+            {c.facilities.length > 0 && (
+              <section id="facilities" className="scroll-mt-32">
+                <h2 className="text-2xl">Facilities</h2>
+                <ul className="mt-3 flex flex-wrap gap-2">{c.facilities.map((x) => <li key={x} className="rounded-full bg-soft px-3.5 py-1.5 text-sm text-brand">{x}</li>)}</ul>
+              </section>
+            )}
+
+            {photos.length > 0 && <section id="photos" className="-mx-4 scroll-mt-32"><Gallery photos={photos} title="Photos" /></section>}
+          </div>
+
+          <aside className="lg:sticky lg:top-40 lg:self-start">
+            <div className="card p-6">
+              <h2 className="text-lg">Interested in this college?</h2>
+              <p className="mt-2 text-sm text-slate-600">Talk to a counsellor about courses, fees and admission. It is free.</p>
+              <Link href="/contact" className="btn btn-accent mt-4 w-full">Request counselling</Link>
+              {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="btn btn-outline mt-2 w-full">WhatsApp us</a>}
+              {tel && <a href={tel} className="btn btn-brand mt-2 w-full">Call {settings.phone}</a>}
+            </div>
+          </aside>
+        </div>
+      </div>
     </div>
   );
 }
