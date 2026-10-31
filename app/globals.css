@@ -171,3 +171,19 @@ a.card:hover, button.card:hover, a.glass-card:hover {
   .rv-hidden { opacity: 1 !important; transform: none !important; }
 }
 
+
+/* About page motion */
+.word-swap { transition: opacity 0.5s ease, transform 0.5s ease; }
+.word-on { opacity: 1; transform: translateY(0); }
+.word-off { opacity: 0; transform: translateY(0.35em); pointer-events: none; }
+@keyframes drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(18px, -22px); } }
+.drift { animation: drift 9s ease-in-out infinite; }
+.drift-slow { animation: drift 13s ease-in-out infinite reverse; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee { animation: marquee 32s linear infinite; }
+.marquee-wrap:hover .marquee { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .word-swap { transition: none; }
+  .drift, .drift-slow, .marquee { animation: none; }
+}
+

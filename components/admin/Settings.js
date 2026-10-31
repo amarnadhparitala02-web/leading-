@@ -80,6 +80,8 @@ export default function Settings() {
 
       <section className="space-y-3">
         <h2 className="text-xl">About page</h2>
+        <Field label="Students joined" hint="Shown on the About page, for example 2000+."><input value={s.about.students} onChange={(e) => setAbout("students", e.target.value)} className="input" /></Field>
+        <Field label="Years of experience" hint="Shown as a large number on the About page, for example 15."><input value={s.about.years} onChange={(e) => setAbout("years", e.target.value)} className="input" /></Field>
         <Field label="About text" hint="Leave a blank line between paragraphs. If empty, the standard text is shown."><textarea value={s.about.intro} onChange={(e) => setAbout("intro", e.target.value)} rows={7} className="input" /></Field>
         <div>
           <p className="mb-1 text-sm font-medium text-brand">Videos (YouTube links)</p>
