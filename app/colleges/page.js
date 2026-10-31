@@ -52,9 +52,6 @@ export default function Colleges() {
     <div className="mx-auto max-w-6xl px-4 py-14 pb-28 md:py-16">
       <p className="eyebrow">Discover colleges</p>
       <h1 className="mt-3 text-4xl md:text-5xl">Find a college that fits</h1>
-      <p className="mt-3 max-w-2xl text-slate-700">
-        Search colleges across Andhra Pradesh and Telangana. We show only verified details, with the year and source of any cutoff.
-      </p>
 
       {isAdmin && (
         <div className="panel-soft mt-5 flex flex-wrap items-center gap-3 border border-dashed border-moss p-3 text-sm">

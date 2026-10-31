@@ -142,7 +142,6 @@ function CollegeDetails() {
         {c.summary && <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-700">{c.summary}</p>}
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Link href="/contact" className="btn btn-accent">Request counselling</Link>
-          <Link href="/rank-guidance" className="btn btn-brand">Check my rank</Link>
           <CompareToggle id={c.id} />
           <SaveButton collegeId={c.id} />
         </div>
