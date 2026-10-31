@@ -30,6 +30,10 @@ export default function Settings() {
   const setHero = (k) => (e) => setS({ ...s, hero: { ...s.hero, [k]: e.target.value } });
   const setLink = (i, k, v) => setS({ ...s, officialLinks: s.officialLinks.map((l, j) => (j === i ? { ...l, [k]: v } : l)) });
 
+  const setAbout = (k, v) => setS({ ...s, about: { ...s.about, [k]: v } });
+  const setAboutRow = (k, i, f, v) => setAbout(k, s.about[k].map((r, j) => (j === i ? { ...r, [f]: v } : r)));
+  const removeAboutRow = (k, i) => setAbout(k, s.about[k].filter((_, j) => j !== i));
+
   async function save(e) {
     e.preventDefault();
     setSaving(true);
@@ -72,6 +76,38 @@ export default function Settings() {
         </div>
         <Field label="Supporting text"><textarea value={s.hero.text} onChange={setHero("text")} rows={3} className="input" /></Field>
         <p className="text-xs text-slate-500">To change the hero picture, upload a photo in Media and choose &ldquo;Homepage hero image&rdquo;.</p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl">About page</h2>
+        <Field label="About text" hint="Leave a blank line between paragraphs. If empty, the standard text is shown."><textarea value={s.about.intro} onChange={(e) => setAbout("intro", e.target.value)} rows={7} className="input" /></Field>
+        <div>
+          <p className="mb-1 text-sm font-medium text-brand">Videos (YouTube links)</p>
+          <div className="space-y-2">
+            {s.about.videos.map((v, i) => (
+              <div key={i} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+                <input value={v.title} onChange={(e) => setAboutRow("videos", i, "title", e.target.value)} placeholder="Video title" className="input" aria-label="Video title" />
+                <input value={v.url} onChange={(e) => setAboutRow("videos", i, "url", e.target.value)} placeholder="https://youtu.be/..." className="input" aria-label="YouTube link" />
+                <button type="button" onClick={() => removeAboutRow("videos", i)} className="px-2 text-sm text-red-600 underline">Remove</button>
+              </div>
+            ))}
+          </div>
+          {s.about.videos.length < 12 && <button type="button" onClick={() => setAbout("videos", [...s.about.videos, { title: "", url: "" }])} className="btn btn-brand mt-2 !py-1.5 text-sm">Add video</button>}
+        </div>
+        <div>
+          <p className="mb-1 text-sm font-medium text-brand">Documents (links to PDFs or brochures)</p>
+          <div className="space-y-2">
+            {s.about.documents.map((d, i) => (
+              <div key={i} className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
+                <input value={d.label} onChange={(e) => setAboutRow("documents", i, "label", e.target.value)} placeholder="Document name" className="input" aria-label="Document name" />
+                <input value={d.url} onChange={(e) => setAboutRow("documents", i, "url", e.target.value)} placeholder="https://..." className="input" aria-label="Document link" />
+                <button type="button" onClick={() => removeAboutRow("documents", i)} className="px-2 text-sm text-red-600 underline">Remove</button>
+              </div>
+            ))}
+          </div>
+          {s.about.documents.length < 12 && <button type="button" onClick={() => setAbout("documents", [...s.about.documents, { label: "", url: "" }])} className="btn btn-brand mt-2 !py-1.5 text-sm">Add document</button>}
+        </div>
+        <p className="text-xs text-slate-500">Photos on the About page come from Media (Gallery).</p>
       </section>
 
       <section className="space-y-3">

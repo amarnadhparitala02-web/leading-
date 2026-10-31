@@ -6,8 +6,8 @@ import Icon from "@/components/Icons";
 import RankPanel from "@/components/home/RankPanel";
 import { useSettings } from "@/components/SettingsProvider";
 
-// Deep navy hero with the rank checker beside the headline. When a real photo is uploaded in the
-// admin Photos tab (slot: Homepage hero), it becomes the hero background under a navy overlay.
+// Light, friendly hero: pale sky background, big headline, the rank checker beside it. When a real photo is
+// uploaded in the admin Media tab (slot: Homepage hero) it fades in on the right behind the form.
 export default function HomeHero() {
   const { settings } = useSettings();
   const [hero, setHero] = useState(null);
@@ -17,45 +17,34 @@ export default function HomeHero() {
   }, []);
 
   return (
-    <section className="on-dark relative overflow-hidden bg-brand text-white">
+    <section className="relative overflow-hidden" style={{ background: "linear-gradient(160deg, #eaf2ff 0%, #f7faff 55%, #ffffff 100%)" }}>
       {hero && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={hero.url} alt={hero.caption || ""} className="absolute inset-0 h-full w-full object-cover" />
+        <img src={hero.url} alt={hero.caption || ""} className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-cover opacity-25 lg:block" />
       )}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: hero
-            ? "linear-gradient(100deg, rgba(11,31,75,0.95) 0%, rgba(11,31,75,0.82) 50%, rgba(11,31,75,0.55) 100%)"
-            : "linear-gradient(120deg, #0b1f4b 0%, #10296a 55%, #1b4db3 130%)",
-        }}
-        aria-hidden="true"
-      />
-      <div
-        className="absolute inset-0 opacity-60"
-        style={{ backgroundImage: "radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-        aria-hidden="true"
-      />
+      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-[#cfe0ff] opacity-60 blur-3xl" aria-hidden="true" />
+      <div className="absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-[#ffe1e1] opacity-60 blur-3xl" aria-hidden="true" />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 md:py-24 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
-          <p className="eyebrow">{settings.hero.eyebrow}</p>
-          <h1 className="mt-5 text-4xl leading-[1.08] md:text-6xl">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-moss shadow-sm ring-1 ring-[color:var(--line)]">
+            <span className="h-2 w-2 rounded-full bg-coral" /> {settings.hero.eyebrow}
+          </p>
+          <h1 className="mt-5 text-4xl leading-[1.1] md:text-6xl">
             {settings.hero.headline}{" "}
-            {settings.hero.highlight && <span className="text-[#9fc0ff]">{settings.hero.highlight}</span>}
+            {settings.hero.highlight && <span className="text-moss">{settings.hero.highlight}</span>}
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">{settings.hero.text}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a href="#journey" className="btn btn-accent whitespace-nowrap">
-              Explore Your Journey <Icon name="arrow" className="h-4 w-4" />
-            </a>
-            <Link href="/colleges" className="btn btn-light">Browse Colleges</Link>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">{settings.hero.text}</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link href="/rank-guidance" className="btn btn-accent whitespace-nowrap">
+              Check my rank <Icon name="arrow" className="h-4 w-4" />
+            </Link>
+            <Link href="/colleges" className="btn btn-outline">Browse colleges</Link>
           </div>
-          <ul className="mt-9 grid gap-3 text-sm text-white/85 sm:grid-cols-2">
-            {["Verified cutoff data", "Honest, student-first guidance", "AP and Telangana colleges", "Free counselling request"].map((t) => (
-              <li key={t} className="flex items-center gap-2.5">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15"><Icon name="check" className="h-3.5 w-3.5" /></span>
-                {t}
+          <ul className="mt-8 flex flex-wrap gap-2 text-sm text-slate-700">
+            {["Verified cutoffs", "AP and Telangana colleges", "Free counselling"].map((t) => (
+              <li key={t} className="flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 shadow-sm ring-1 ring-[color:var(--line)]">
+                <Icon name="check" className="h-3.5 w-3.5 text-moss" /> {t}
               </li>
             ))}
           </ul>

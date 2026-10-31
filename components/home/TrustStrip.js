@@ -1,23 +1,22 @@
 import Icon from "@/components/Icons";
 
-const items = [
-  ["shield", "Verified cutoff data", "Year and source shown"],
-  ["chart", "AP and TS EAPCET", "Indicative rank guidance"],
-  ["building", "B.Tech and Agriculture", "Colleges across both states"],
-  ["chat", "Free counselling", "Only when you ask for it"],
+const steps = [
+  ["chart", "1. Enter your rank", "Tell us your EAPCET rank and category."],
+  ["building", "2. See your colleges", "Browse colleges and courses that may fit."],
+  ["chat", "3. Talk to a counsellor", "Ask us anything, free of charge."],
 ];
 
-// A quiet trust bar under the hero.
+// Three easy steps under the hero.
 export default function TrustStrip() {
   return (
-    <div className="border-b border-[color:var(--line)] bg-white">
-      <ul className="mx-auto grid max-w-6xl divide-[color:var(--line)] px-4 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x">
-        {items.map(([icon, title, text]) => (
-          <li key={title} className="flex items-center gap-3 px-2 py-5 lg:px-6">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-soft text-moss"><Icon name={icon} className="h-5 w-5" /></span>
+    <div className="bg-white">
+      <ul className="mx-auto grid max-w-6xl gap-4 px-4 py-8 md:grid-cols-3">
+        {steps.map(([icon, title, text]) => (
+          <li key={title} className="flex items-center gap-4 rounded-2xl bg-soft p-5">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-moss shadow-sm"><Icon name={icon} className="h-6 w-6" /></span>
             <span>
-              <span className="block text-sm font-semibold text-brand">{title}</span>
-              <span className="block text-xs text-slate-500">{text}</span>
+              <span className="block font-bold text-brand">{title}</span>
+              <span className="block text-sm text-slate-600">{text}</span>
             </span>
           </li>
         ))}
