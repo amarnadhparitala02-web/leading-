@@ -163,7 +163,7 @@ export default function About() {
         </ul>
       </section>
 
-      <Gallery title={`Life at ${s.short}`} />
+      <Gallery title={`Life at ${s.short}`} featured />
 
       {s.about.videos.length > 0 && (
         <section className="mx-auto max-w-6xl px-4 py-12 md:py-16">
