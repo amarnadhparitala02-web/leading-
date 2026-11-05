@@ -1,11 +1,13 @@
 import { all } from "@/lib/db";
 import { photoUrl } from "@/lib/photos";
+import { expand } from "@/lib/cutoffs";
 import { latestCutoffs, publicCollege } from "@/lib/public";
 
 // ?ids=a,b,c compares up to 3 active colleges. Unknown or hidden ids are ignored.
 export async function GET(request) {
   const ids = (new URL(request.url).searchParams.get("ids") || "").split(",").map((s) => s.trim()).filter(Boolean).slice(0, 3);
-  const [colleges, courses, photos, cutoffs] = await Promise.all([all("colleges"), all("courses"), all("photos"), all("cutoffs")]);
+  const [colleges, courses, photos, rawCutoffs] = await Promise.all([all("colleges"), all("courses"), all("photos"), all("cutoffs")]);
+  const cutoffs = expand(rawCutoffs.filter((c) => c.verified));
   const courseById = new Map(courses.map((c) => [c.id, c]));
 
   const list = ids

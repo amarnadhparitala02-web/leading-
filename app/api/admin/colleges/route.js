@@ -40,6 +40,8 @@ function fromBody(b) {
     feeNote: clean(b.feeNote, 300),
     feeVerifiedOn: clean(b.feeVerifiedOn, 10),
     active: b.active !== false,
+    // true = used for rank results and cutoff history only, not shown in the public college list
+    ...(b.cutoffOnly !== undefined ? { cutoffOnly: Boolean(b.cutoffOnly) } : {}),
     partnership: { mou: Boolean(b.partnership?.mou), displayPublic: Boolean(b.partnership?.displayPublic) },
     courseIds,
     courseDetails: cleanCourseDetails(b.courseDetails, courseIds),

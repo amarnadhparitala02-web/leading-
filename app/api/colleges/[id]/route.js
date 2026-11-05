@@ -1,6 +1,7 @@
 import { all } from "@/lib/db";
 import { photoUrl } from "@/lib/photos";
 import { DEFAULT_EXAM } from "@/lib/site";
+import { expand } from "@/lib/cutoffs";
 import { publicCollege } from "@/lib/public";
 
 // One college: its summary and facts, its courses (with the details an admin entered), the
@@ -12,7 +13,7 @@ export async function GET(request, { params }) {
   if (!college) return Response.json({ error: "Not found" }, { status: 404 });
 
   const courseById = new Map(courses.map((c) => [c.id, c]));
-  const history = cutoffs
+  const history = expand(cutoffs.filter((c) => c.collegeId === id))
     .filter((c) => c.collegeId === id && c.verified)
     .map((c) => ({
       courseId: c.courseId,

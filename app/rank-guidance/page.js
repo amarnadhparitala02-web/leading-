@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/components/SettingsProvider";
-import { CATEGORIES, EXAMS, GENDERS, STREAMS } from "@/lib/site";
+import { EXAMS, GENDERS, STREAMS, categoriesFor } from "@/lib/site";
 import { waHref } from "@/lib/settings";
 
 const thisYear = 2026;
@@ -28,17 +28,29 @@ export default function RankChecker() {
   const [student, setStudent] = useState(null);
   const [exam, setExam] = useState(EXAMS[0]);
   const [pre, setPre] = useState({ stream: "btech", rank: "", category: "OC" });
+  const [category, setCategory] = useState("OC");
+  const [years, setYears] = useState([]);
+  const [lastBody, setLastBody] = useState(null);
 
   // The homepage's quick check passes ?exam=&stream=&category=&rank= so the form opens pre-filled.
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    if (EXAMS.includes(q.get("exam"))) setExam(q.get("exam"));
+    const e = EXAMS.includes(q.get("exam")) ? q.get("exam") : EXAMS[0];
+    setExam(e);
+    const cat = categoriesFor(e).includes(q.get("category")) ? q.get("category") : "OC";
+    setCategory(cat);
     setPre({
       stream: STREAMS[q.get("stream")] ? q.get("stream") : "btech",
-      category: CATEGORIES.includes(q.get("category")) ? q.get("category") : "OC",
+      category: cat,
       rank: (q.get("rank") || "").replace(/\D/g, "").slice(0, 7),
     });
   }, []);
+
+  // The cutoff years we have data for, so a student can compare against a particular year.
+  useEffect(() => {
+    fetch(`/api/rank-guidance/years?exam=${encodeURIComponent(exam)}`).then((r) => r.json()).then((d) => setYears(d.years || [])).catch(() => setYears([]));
+    setCategory((c) => (categoriesFor(exam).includes(c) ? c : c.startsWith("SC") ? (exam === "TS EAPCET" ? "SC-I" : "SC") : "OC"));
+  }, [exam]);
 
   // Signed-in students do not retype their name and number; the search is saved to their account.
   useEffect(() => {
@@ -50,21 +62,30 @@ export default function RankChecker() {
     setState("sending");
     setError("");
     const f = new FormData(e.currentTarget);
+    const body = {
+      ...Object.fromEntries(f),
+      exam,
+      privacyConsent: f.get("privacyConsent") === "on",
+      followUpConsent: f.get("followUpConsent") === "on",
+    };
+    await run(body);
+  }
+
+  // Runs a search. Used by the form and by the year buttons on the results page.
+  async function run(body, rerun = false) {
+    setState("sending");
+    setError("");
     try {
       const res = await fetch("/api/rank-guidance/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...Object.fromEntries(f),
-          exam,
-          privacyConsent: f.get("privacyConsent") === "on",
-          followUpConsent: f.get("followUpConsent") === "on",
-        }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Something went wrong");
-      setOut({ ...data, exam });
-      setRequested(data.leadCreated);
+      setLastBody(body);
+      setOut({ ...data, exam: body.exam });
+      if (!rerun) setRequested(data.leadCreated);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setError(err.message === "Failed to fetch" ? "We could not reach the server. Please check your connection and try again." : err.message);
@@ -92,6 +113,19 @@ export default function RankChecker() {
           depend on current official counselling rules and data. They do not guarantee admission.
         </p>
 
+        {out.years?.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 text-sm" role="group" aria-label="Cutoff year">
+            <span className="font-medium text-brand">Cutoff year:</span>
+            {out.years.map((y) => (
+              <button key={y} type="button" disabled={state === "sending"} onClick={() => run({ ...lastBody, cutoffYear: y, followUpConsent: false }, true)}
+                className={`rounded-full px-3 py-1 font-semibold ${out.usedYear === y ? "bg-brand text-white" : "bg-soft text-brand hover:bg-white"}`}>{y}</button>
+            ))}
+            <button type="button" disabled={state === "sending"} onClick={() => run({ ...lastBody, cutoffYear: "latest", followUpConsent: false }, true)} className="rounded-full bg-soft px-3 py-1 text-brand hover:bg-white">Latest per college</button>
+          </div>
+        )}
+        {error && <p className="mt-2 text-sm text-red-600" role="alert">{error}</p>}
+        {out.total > out.results.length && <p className="mt-3 text-sm text-slate-600">Showing the closest {out.results.length} of {out.total} matches.</p>}
+
         {out.results.length === 0 ? (
           <div className="panel-soft mt-6 p-7">
             <p className="font-semibold text-brand">We do not have verified cutoff records matching these details yet.</p>
@@ -112,7 +146,10 @@ export default function RankChecker() {
                       <span className="block text-xs text-slate-500">{[r.district, r.state].filter(Boolean).join(", ")}</span>
                     </td>
                     <td className="p-3">{r.course}</td>
-                    <td className="p-3">{r.closingRank.toLocaleString("en-IN")}</td>
+                    <td className="p-3">
+                      {r.closingRank.toLocaleString("en-IN")}
+                      {r.history?.length > 1 && <span className="block text-xs text-slate-500">{r.history.map((h) => `${h.year}: ${h.closingRank.toLocaleString("en-IN")}`).join(" · ")}</span>}
+                    </td>
                     <td className="p-3 text-xs">
                       {r.exam} {r.year} · {r.round} · {r.category}
                       <span className="block text-slate-500">Source: {r.source}</span>
@@ -168,6 +205,12 @@ export default function RankChecker() {
           <Field label="Exam year">
             <select name="year" className="input" defaultValue={thisYear}>{[thisYear, thisYear - 1, thisYear - 2].map((y) => <option key={y}>{y}</option>)}</select>
           </Field>
+          <Field label="Compare with cutoffs of" hint={years.length ? "Latest uses the newest year each college has data for." : "No cutoff data for this exam yet."}>
+            <select name="cutoffYear" className="input" defaultValue="latest">
+              <option value="latest">Latest available{years[0] ? ` (${years[0]})` : ""}</option>
+              {years.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </Field>
           <Field label="Stream">
             <select name="stream" className="input" defaultValue={pre.stream} key={`s-${pre.stream}`}>{Object.entries(STREAMS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
           </Field>
@@ -175,7 +218,7 @@ export default function RankChecker() {
             <input name="rank" required inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 12500" className="input" defaultValue={pre.rank} key={`r-${pre.rank}`} />
           </Field>
           <Field label="Category">
-            <select name="category" className="input" defaultValue={pre.category} key={`c-${pre.category}`}>{CATEGORIES.map((c) => <option key={c}>{c}</option>)}</select>
+            <select name="category" className="input" value={category} onChange={(e) => setCategory(e.target.value)}>{categoriesFor(exam).map((c) => <option key={c}>{c}</option>)}</select>
           </Field>
           <Field label="Boys or girls">
             <select name="gender" className="input" defaultValue="Boys">{GENDERS.map((g) => <option key={g}>{g}</option>)}</select>

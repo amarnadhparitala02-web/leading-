@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CATEGORIES, EXAMS, STREAMS } from "@/lib/site";
+import { EXAMS, STREAMS, categoriesFor } from "@/lib/site";
 
 // Quick rank check. It opens the full Rank Checker with these choices already filled in.
 export default function RankPanel() {
@@ -33,7 +33,7 @@ export default function RankPanel() {
             type="button"
             role="radio"
             aria-checked={exam === x}
-            onClick={() => setExam(x)}
+            onClick={() => { setExam(x); if (!categoriesFor(x).includes(category)) setCategory(category.startsWith("SC") ? (x === "TS EAPCET" ? "SC-I" : "SC") : "OC"); }}
             className={`rounded-md px-3 py-2 text-sm font-semibold transition ${exam === x ? "bg-brand text-white shadow-sm" : "text-brand hover:bg-white"}`}
           >
             {x}
@@ -51,7 +51,7 @@ export default function RankPanel() {
         <label className="text-sm">
           <span className="mb-1 block font-medium text-brand">Category</span>
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
-            {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            {categoriesFor(exam).map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
         <label className="text-sm sm:col-span-2">

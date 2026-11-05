@@ -1,5 +1,6 @@
 import { all } from "@/lib/db";
 import { photoUrl } from "@/lib/photos";
+import { expand } from "@/lib/cutoffs";
 import { latestCutoffs, publicCollege } from "@/lib/public";
 
 // Filters: q (name), state, district, stream, course (course id), partner=1, limit.
@@ -13,13 +14,14 @@ export async function GET(request) {
   const partner = searchParams.get("partner") === "1";
   const limit = Math.min(Number(searchParams.get("limit")) || 100, 100);
 
-  const [colleges, courses, photos, cutoffs] = await Promise.all([all("colleges"), all("courses"), all("photos"), all("cutoffs")]);
+  const [colleges, courses, photos, rawCutoffs] = await Promise.all([all("colleges"), all("courses"), all("photos"), all("cutoffs")]);
+  const cutoffs = expand(rawCutoffs.filter((c) => c.verified));
   const courseById = new Map(courses.map((c) => [c.id, c]));
   const cover = new Map();
   for (const p of photos) if (p.collegeId && !cover.has(p.collegeId)) cover.set(p.collegeId, photoUrl(p.file));
 
   const list = colleges
-    .filter((c) => c.active)
+    .filter((c) => c.active && !c.cutoffOnly) // colleges added only for cutoff data stay off the public list
     .map((c) => ({ ...publicCollege(c, courseById), cover: cover.get(c.id) || "", cutoffs: latestCutoffs(c.id, cutoffs, courseById) }))
     .filter((c) => !q || c.name.toLowerCase().includes(q))
     .filter((c) => !state || c.state.toLowerCase() === state)

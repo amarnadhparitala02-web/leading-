@@ -50,6 +50,25 @@ function Fact({ label, value }) {
   );
 }
 
+const CAT_ORDER = ["OC", "BC-A", "BC-B", "BC-C", "BC-D", "BC-E", "SC", "SC-I", "SC-II", "SC-III", "ST", "EWS"];
+const rankText = (n) => (n == null ? "-" : n.toLocaleString("en-IN"));
+
+// One block per exam + year + round, each listing every category with its boys / girls closing rank.
+function groupCutoffs(rows) {
+  const groups = new Map();
+  for (const x of rows) {
+    const key = `${x.exam}|${x.year}|${x.round}`;
+    const g = groups.get(key) || { key, exam: x.exam, year: x.year, round: x.round, source: x.source, demo: x.demo, byCat: new Map() };
+    const cat = g.byCat.get(x.category) || { category: x.category };
+    cat[x.gender] = x.closingRank;
+    g.byCat.set(x.category, cat);
+    groups.set(key, g);
+  }
+  return [...groups.values()]
+    .map((g) => ({ ...g, cats: [...g.byCat.values()].sort((a, b) => CAT_ORDER.indexOf(a.category) - CAT_ORDER.indexOf(b.category)) }))
+    .sort((a, b) => b.year - a.year);
+}
+
 function CourseDetails({ course, cutoffs }) {
   const rows = cutoffs.filter((x) => x.courseId === course.id);
   const facts = [
@@ -80,22 +99,26 @@ function CourseDetails({ course, cutoffs }) {
       {rows.length === 0 ? (
         <p className="mt-2 text-sm text-slate-500">No verified cutoff records yet.</p>
       ) : (
-        <div className="mt-3 overflow-x-auto rounded-lg border border-[color:var(--line)]">
-          <table className="w-full min-w-[520px] text-left text-sm">
-            <thead className="bg-soft text-brand">
-              <tr><th scope="col" className="p-2.5">Exam</th><th scope="col" className="p-2.5">Year</th><th scope="col" className="p-2.5">Round</th><th scope="col" className="p-2.5">Category</th><th scope="col" className="p-2.5">Closing rank</th><th scope="col" className="p-2.5">Source</th></tr>
-            </thead>
-            <tbody>
-              {rows.map((x, i) => (
-                <tr key={i} className="border-t border-[color:var(--line)]">
-                  <td className="p-2.5">{x.exam}</td><td className="p-2.5">{x.year}</td><td className="p-2.5">{x.round}</td>
-                  <td className="p-2.5">{x.category}{x.gender !== "Any" ? ` (${x.gender})` : ""}</td>
-                  <td className="p-2.5 font-semibold">{x.closingRank.toLocaleString("en-IN")}</td>
-                  <td className="p-2.5 text-xs">{x.source}{x.demo && <b className="ml-1 text-red-700">DEMO</b>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-3 space-y-5">
+          {groupCutoffs(rows).map((g) => (
+            <div key={g.key}>
+              <p className="text-sm font-semibold text-brand">{g.exam} {g.year} · {g.round} <span className="ml-1 text-xs font-normal text-slate-500">Source: {g.source}{g.demo && <b className="ml-1 text-red-700">DEMO</b>}</span></p>
+              <div className="mt-1.5 overflow-x-auto rounded-lg border border-[color:var(--line)]">
+                <table className="w-full min-w-[320px] text-left text-sm">
+                  <thead className="bg-soft text-brand"><tr><th scope="col" className="p-2.5">Category</th><th scope="col" className="p-2.5">Boys</th><th scope="col" className="p-2.5">Girls</th></tr></thead>
+                  <tbody>
+                    {g.cats.map((c) => (
+                      <tr key={c.category} className="border-t border-[color:var(--line)]">
+                        <td className="p-2.5">{c.category}</td>
+                        <td className="p-2.5 font-semibold">{rankText(c.Boys ?? c.Any)}</td>
+                        <td className="p-2.5 font-semibold">{rankText(c.Girls ?? c.Any)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
         </div>
       )}
       <p className="mt-2 text-xs text-slate-500">Past cutoffs are indicative and do not guarantee admission in any year.</p>

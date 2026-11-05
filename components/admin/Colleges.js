@@ -140,6 +140,7 @@ export default function Colleges() {
             {shown.map((c) => (
               <tr key={c.id} className="border-t border-[color:var(--line)]">
                 <td className="p-3 font-semibold text-brand">{c.name} {c.demo && <b className="ml-1 text-xs text-red-700">DEMO</b>}
+                  {c.cutoffOnly && <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-600">Rank data only</span>}
                   {c.partnership?.mou && <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-xs font-medium">{c.partnership.displayPublic ? "Partner" : "Partner (private)"}</span>}</td>
                 <td className="p-3 text-slate-600">{[c.district, c.state].filter(Boolean).join(", ")}</td>
                 <td className="p-3">{c.courseIds?.length || 0}</td>
@@ -289,6 +290,7 @@ function Editor({ form, setForm, editId, catalog, reloadCatalog, onSave, onCance
           <Field label="Fees note verified on"><input type="date" value={form.feeVerifiedOn} onChange={set("feeVerifiedOn")} className="input" /></Field>
         </div>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.active} onChange={set("active")} /> Visible on the website</label>
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!form.cutoffOnly} onChange={(e) => setForm({ ...form, cutoffOnly: !e.target.checked })} /> Show in the public college list (untick to use this college for rank results only)</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.mou} onChange={set("mou")} /> We have a verified MOU / partnership with this college</label>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.displayPublic} disabled={!form.mou} onChange={set("displayPublic")} /> The college has permitted us to show the partnership publicly</label>
       </section>

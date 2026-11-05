@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { api } from "./api";
-import { CATEGORIES, EXAMS } from "@/lib/site";
+import { EXAMS, CATEGORIES } from "@/lib/site";
+import { summarizeRanks } from "@/lib/cutoffs";
 
 const SAMPLE = "college,course,year,round,category,gender,closingRank,source,exam\n";
 const blank = { collegeId: "", courseId: "", exam: "TS EAPCET", year: "2025", round: "Final", category: "OC", gender: "Any", closingRank: "", source: "", verified: false };
@@ -26,8 +27,20 @@ export default function Cutoffs() {
   const [msg, setMsg] = useState(null);
   const [filter, setFilter] = useState("all");
   const [showCsv, setShowCsv] = useState(false);
+  const [datasets, setDatasets] = useState([]);
+  const [up, setUp] = useState({ exam: "TS EAPCET", year: "", round: "", source: "", verified: true });
+  const [file, setFile] = useState(null);
+  const [upMsg, setUpMsg] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [yearFilter, setYearFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [limit, setLimit] = useState(100);
 
-  const load = () => api("/api/admin/cutoffs").then((r) => r.ok && setRows(r.data.cutoffs));
+  const loadDatasets = () => api("/api/admin/cutoffs/upload").then((r) => r.ok && setDatasets(r.data.datasets));
+  const load = () => {
+    loadDatasets();
+    return api("/api/admin/cutoffs").then((r) => r.ok && setRows(r.data.cutoffs));
+  };
   useEffect(() => {
     load();
     api("/api/admin/colleges").then((r) => r.ok && setColleges(r.data.colleges));
@@ -45,6 +58,36 @@ export default function Cutoffs() {
     if (!r.ok) return setFormMsg({ error: r.data.error || "Could not add" });
     setFormMsg({ ok: form.verified ? "Added and verified. It now feeds rank suggestions." : "Added. Verify it below before it is used." });
     setForm({ ...form, closingRank: "" });
+    load();
+  }
+
+  async function upload(mode) {
+    if (!file) return setUpMsg({ error: "Choose a PDF or CSV file first" });
+    setBusy(true);
+    setUpMsg(null);
+    const f = new FormData();
+    f.set("file", file);
+    f.set("mode", mode);
+    f.set("exam", up.exam);
+    f.set("year", up.year);
+    f.set("round", up.round);
+    f.set("source", up.source);
+    f.set("verified", up.verified ? "1" : "0");
+    const r = await api("/api/admin/cutoffs/upload", "POST", f);
+    setBusy(false);
+    if (!r.ok) return setUpMsg({ error: r.data.error || "Upload failed" });
+    if (mode === "preview") return setUpMsg({ preview: r.data.preview });
+    setUpMsg({ saved: r.data.saved });
+    setFile(null);
+    load();
+    api("/api/admin/colleges").then((x) => x.ok && setColleges(x.data.colleges));
+    api("/api/admin/courses").then((x) => x.ok && setCourses(x.data.courses));
+  }
+
+  async function removeYear(d) {
+    if (!confirm(`Delete ALL ${d.exam} ${d.year} ${d.round} cutoff data (${d.records} records)? This cannot be undone.`)) return;
+    const q = new URLSearchParams({ exam: d.exam, year: d.year, round: d.round });
+    await api(`/api/admin/cutoffs/upload?${q}`, "DELETE");
     load();
   }
 
@@ -74,10 +117,80 @@ export default function Cutoffs() {
   }
 
   if (!rows) return <p>Loading...</p>;
-  const shown = rows.filter((r) => filter === "all" || (filter === "verified" ? r.verified : !r.verified));
+  const years = [...new Set(rows.map((r) => r.year))].sort((a, b) => b - a);
+  const q = search.trim().toLowerCase();
+  const matching = rows.filter(
+    (r) =>
+      (filter === "all" || (filter === "verified" ? r.verified : !r.verified)) &&
+      (yearFilter === "all" || String(r.year) === yearFilter) &&
+      (!q || `${r.collegeName} ${r.courseName}`.toLowerCase().includes(q)),
+  );
+  const shown = matching.slice(0, limit);
+  const setU = (k) => (e) => setUp({ ...up, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
+  const pv = upMsg?.preview;
+  const sv = upMsg?.saved;
 
   return (
     <div className="space-y-8">
+      <section className="rounded-xl border border-[color:var(--line)] p-5">
+        <h2 className="text-lg font-bold text-brand">Year-wise cutoff data</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Upload each year&apos;s official last-rank statement. Rank suggestions use the newest year by default, and students can pick an earlier year.
+          Uploading again for the same exam, year and round replaces that data. Other years are never touched.
+        </p>
+
+        {datasets.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-500">No cutoff data uploaded yet.</p>
+        ) : (
+          <div className="mt-3 overflow-x-auto rounded-lg border border-[color:var(--line)]">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead className="bg-soft text-brand"><tr><th className="p-2.5">Exam</th><th className="p-2.5">Year</th><th className="p-2.5">Round</th><th className="p-2.5">Colleges</th><th className="p-2.5">Records</th><th className="p-2.5">Verified</th><th className="p-2.5"></th></tr></thead>
+              <tbody>
+                {datasets.map((d) => (
+                  <tr key={`${d.exam}${d.year}${d.round}`} className="border-t border-[color:var(--line)]">
+                    <td className="p-2.5">{d.exam}</td><td className="p-2.5 font-semibold">{d.year}</td><td className="p-2.5">{d.round}</td>
+                    <td className="p-2.5">{d.colleges}</td><td className="p-2.5">{d.records}</td>
+                    <td className="p-2.5">{d.verified === d.records ? "All" : `${d.verified} of ${d.records}`}</td>
+                    <td className="p-2.5 text-right"><button onClick={() => removeYear(d)} className="text-red-600 underline">Delete year</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <Field label="Exam *"><select value={up.exam} onChange={setU("exam")} className="input">{EXAMS.map((x) => <option key={x}>{x}</option>)}</select></Field>
+          <Field label="Year"><input value={up.year} onChange={setU("year")} inputMode="numeric" placeholder="from PDF, e.g. 2025" className="input" /></Field>
+          <Field label="Round / phase"><input value={up.round} onChange={setU("round")} placeholder="from PDF, e.g. Second Phase" className="input" /></Field>
+          <Field label="Source"><input value={up.source} onChange={setU("source")} placeholder="from PDF" className="input" /></Field>
+        </div>
+        <div className="mt-3">
+          <Field label="File (TGCHE last rank PDF, or CSV) *">
+            <input type="file" accept=".pdf,.csv,application/pdf,text/csv" onChange={(e) => { setFile(e.target.files?.[0] || null); setUpMsg(null); }} className="input" />
+          </Field>
+          <p className="mt-1 text-xs text-slate-500">
+            CSV columns: <code>college, course</code> then ranks such as <code>OC_BOYS, OC_GIRLS, BC_A_BOYS, ..., SC_I_BOYS, ST_GIRLS, EWS_BOYS</code> (use <code>SC_BOYS</code> for AP). Optional: <code>instCode, branchCode, state, district</code>.
+          </p>
+        </div>
+        <label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={up.verified} onChange={setU("verified")} /> This is an official published statement (mark verified so it is used in rank suggestions)</label>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button onClick={() => upload("preview")} disabled={busy || !file} className="btn btn-outline text-sm disabled:opacity-50">{busy ? "Working..." : "Preview"}</button>
+          {pv && <button onClick={() => upload("commit")} disabled={busy} className="btn btn-accent text-sm disabled:opacity-50">Save {pv.year} data</button>}
+        </div>
+        {upMsg?.error && <p className="mt-3 text-sm text-red-600" role="alert">{upMsg.error}</p>}
+        {pv && (
+          <div className="panel-soft mt-3 p-4 text-sm" role="status">
+            <p className="font-semibold text-brand">{pv.exam} {pv.year} · {pv.round}: {pv.records} branch records for {pv.colleges} colleges ({pv.rankValues.toLocaleString("en-IN")} ranks)</p>
+            <p className="mt-1">{pv.newColleges} new colleges and {pv.newCourses} new courses will be added{pv.replacing ? `; ${pv.replacing} existing records for this year will be replaced` : ""}. New colleges stay off the public college list and are used for rank results only.</p>
+            {pv.newCourseNames.length > 0 && <p className="mt-1 text-xs text-slate-600">New courses: {pv.newCourseNames.join(", ")}</p>}
+            {pv.warnings.map((w) => <p key={w} className="text-xs text-amber-700">{w}</p>)}
+            <p className="mt-2 text-xs text-slate-500">Nothing is saved until you press Save.</p>
+          </div>
+        )}
+        {sv && <p className="mt-3 text-sm text-green-700" role="status">Saved {sv.records} records for {sv.exam} {sv.year} ({sv.round}).</p>}
+      </section>
+
       <form onSubmit={add} className="rounded-xl border border-[color:var(--line)] p-5">
         <h2 className="text-lg font-bold text-brand">Add a cutoff</h2>
         <p className="mt-1 text-sm text-slate-600">Pick the college first; its courses appear next. Add the course to the college under Colleges and courses if it is missing.</p>
@@ -131,19 +244,28 @@ export default function Cutoffs() {
       <div>
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <h2 className="text-lg font-bold text-brand">All cutoff records</h2>
-          <select value={filter} onChange={(e) => setFilter(e.target.value)} className="input !w-auto" aria-label="Filter records">
+          <select value={filter} onChange={(e) => { setFilter(e.target.value); setLimit(100); }} className="input !w-auto" aria-label="Filter records">
             <option value="all">All ({rows.length})</option>
             <option value="verified">Verified</option>
             <option value="unverified">Unverified</option>
           </select>
+          <select value={yearFilter} onChange={(e) => { setYearFilter(e.target.value); setLimit(100); }} className="input !w-auto" aria-label="Filter by year">
+            <option value="all">All years</option>
+            {years.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <input value={search} onChange={(e) => { setSearch(e.target.value); setLimit(100); }} placeholder="Search college or course" className="input !w-auto min-w-[220px]" aria-label="Search records" />
         </div>
-        {shown.length === 0 && <p className="panel-soft p-6 text-slate-500">No cutoff records.</p>}
+        <p className="mb-2 text-xs text-slate-500">Showing {shown.length} of {matching.length}</p>
+        {matching.length === 0 && <p className="panel-soft p-6 text-slate-500">No cutoff records.</p>}
         <div className="space-y-2">
           {shown.map((c) => (
             <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color:var(--line)] p-3 text-sm">
               <div>
                 <p className="font-semibold text-brand">{c.collegeName} · {c.courseName} {c.demo && <b className="text-xs text-red-700">DEMO</b>}</p>
-                <p className="text-xs text-slate-500">{c.exam || "TS EAPCET"} · {c.year} · {c.round} · {c.category} · {c.gender} · closing {c.closingRank.toLocaleString("en-IN")} · {c.source}</p>
+                <p className="text-xs text-slate-500">
+                  {c.exam || "TS EAPCET"} · {c.year} · {c.round} ·{" "}
+                  {c.ranks ? summarizeRanks(c.ranks) : `${c.category} · ${c.gender} · closing ${c.closingRank.toLocaleString("en-IN")}`} · {c.source}
+                </p>
               </div>
               <div className="flex gap-3">
                 <button onClick={() => verify(c)} className={`underline ${c.verified ? "text-green-700" : "text-amber-700"}`}>{c.verified ? `Verified ${c.verifiedOn}` : "Verify"}</button>
@@ -152,6 +274,7 @@ export default function Cutoffs() {
             </div>
           ))}
         </div>
+        {matching.length > shown.length && <button onClick={() => setLimit(limit + 200)} className="mt-3 text-sm font-semibold text-moss underline">Show more</button>}
       </div>
     </div>
   );

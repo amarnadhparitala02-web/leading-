@@ -24,7 +24,7 @@ export async function GET(request) {
       leads: leads.length,
       rankSearches: searches.length,
       students: students.length,
-      colleges: colleges.filter((c) => c.active).length,
+      colleges: colleges.filter((c) => c.active && !c.cutoffOnly).length,
       verifiedCutoffs: cutoffs.filter((c) => c.verified).length,
       unverifiedCutoffs: cutoffs.filter((c) => !c.verified).length,
     },

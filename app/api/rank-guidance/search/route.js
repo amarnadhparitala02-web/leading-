@@ -1,7 +1,7 @@
 import { currentStudent } from "@/lib/auth";
 import { insert } from "@/lib/db";
 import { matchRank } from "@/lib/match";
-import { CATEGORIES, EXAMS, GENDERS, STREAMS } from "@/lib/site";
+import { EXAMS, GENDERS, STREAMS, categoriesFor } from "@/lib/site";
 import { clean, json, normalizePhone, rateLimited, validPhone } from "@/lib/validate";
 
 export async function POST(request) {
@@ -20,25 +20,28 @@ export async function POST(request) {
   const region = clean(body.region, 60);
   const year = Number(body.year);
   const rank = Number(body.rank);
+  const cutoffYear = body.cutoffYear === "latest" || !body.cutoffYear ? "latest" : Number(body.cutoffYear);
 
   if (name.length < 2) return json({ error: "Please enter your full name" }, 400);
   if (!validPhone(phone)) return json({ error: "Enter a valid 10-digit mobile number" }, 400);
   if (!EXAMS.includes(exam)) return json({ error: "Choose AP EAPCET or TS EAPCET" }, 400);
   if (!STREAMS[stream]) return json({ error: "Choose a stream" }, 400);
-  if (!CATEGORIES.includes(category)) return json({ error: "Choose a category" }, 400);
+  if (!categoriesFor(exam).includes(category)) return json({ error: "Choose a category for this exam" }, 400);
   if (!GENDERS.includes(gender)) return json({ error: "Choose Boys or Girls" }, 400);
   if (!Number.isInteger(year) || year < 2015 || year > 2100) return json({ error: "Enter a valid exam year" }, 400);
   if (!Number.isInteger(rank) || rank < 1 || rank > 1_000_000) return json({ error: "Enter a valid rank" }, 400);
   if (body.privacyConsent !== true) return json({ error: "Please accept the privacy notice to continue" }, 400);
 
-  const results = await matchRank({ exam, stream, rank, category, gender, region });
+  if (cutoffYear !== "latest" && (!Number.isInteger(cutoffYear) || cutoffYear < 2015 || cutoffYear > 2100)) return json({ error: "Choose a valid cutoff year" }, 400);
+
+  const { results, total, years, usedYear } = await matchRank({ exam, stream, rank, category, gender, region, cutoffYear });
   const followUp = body.followUpConsent === true;
   const now = new Date().toISOString();
 
   const search = await insert("rankSearches", {
     name, phone, exam, year, stream, rank, category, gender, region,
     consent: { privacyAt: now, followUp },
-    resultCount: results.length,
+    resultCount: total, cutoffYear: usedYear,
     studentId: student?.id || "",
   });
 
@@ -52,5 +55,5 @@ export async function POST(request) {
     });
   }
 
-  return json({ searchId: search.id, results, leadCreated: followUp });
+  return json({ searchId: search.id, results, total, years, usedYear, leadCreated: followUp });
 }
